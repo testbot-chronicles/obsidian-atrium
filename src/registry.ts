@@ -34,6 +34,8 @@ export interface WidgetDef {
   Component: typeof SvelteComponent;
   defaultConfig?: Record<string, unknown>;
   settingsSchema?: SettingsField[];
+  /** When set, the widget shows a card header with this title by default. */
+  defaultTitle?: string;
 }
 
 const registry = new Map<string, WidgetDef>();

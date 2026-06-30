@@ -1,4 +1,5 @@
 import type { WidgetAppearance } from "./appearance";
+import type { WidgetGeneral } from "./general";
 
 export interface BackgroundSettings {
   type: "none" | "color" | "gradient" | "image";
@@ -17,6 +18,7 @@ export interface WidgetInstance {
   x: number; y: number; w: number; h: number;
   config: Record<string, unknown>;
   appearance?: WidgetAppearance;
+  general?: WidgetGeneral;
   /** When true, the widget is frozen: it can't be moved/resized and won't be pushed by other widgets. */
   locked?: boolean;
 }

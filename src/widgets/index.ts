@@ -109,6 +109,7 @@ export function registerAllWidgets(): void {
   registerWidget({
     type: "stats", title: "Vault stats", icon: "bar-chart-3", defaultSize: { w: 4, h: 2 },
     Component: StatsWidget as never,
+    defaultTitle: "Stats",
     defaultConfig: { showNotes: true, showAttachments: true, showFiles: false },
     settingsSchema: [
       { key: "showNotes", label: "Notes count", type: "toggle" },

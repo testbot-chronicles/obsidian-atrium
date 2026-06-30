@@ -2,6 +2,7 @@ import { Setting } from "obsidian";
 import type { WidgetDef, SettingsField } from "../registry";
 import type { WidgetInstance } from "../types";
 import { APPEARANCE_SCHEMA, DEFAULT_APPEARANCE } from "../appearance";
+import { GENERAL_SCHEMA, defaultGeneral } from "../general";
 
 /** Callbacks the panel invokes to drive live preview and persistence. */
 export interface SettingsHooks {
@@ -49,12 +50,21 @@ export class WidgetSettingsPanel {
   }
 
   /**
-   * The sections to render: the widget's own settings (writing `instance.config`)
-   * and the shared Appearance section (writing `instance.appearance`, lazily
-   * initialized from {@link DEFAULT_APPEARANCE}).
+   * The sections to render: the shared General section (writing `instance.general`,
+   * lazily initialized from {@link defaultGeneral}), the widget's own settings
+   * (writing `instance.config`), and the shared Appearance section (writing
+   * `instance.appearance`, lazily initialized from {@link DEFAULT_APPEARANCE}).
    */
   private sections(): Section[] {
     return [
+      {
+        title: "General",
+        schema: GENERAL_SCHEMA,
+        target: () => {
+          if (!this.instance.general) this.instance.general = defaultGeneral(this.def.defaultTitle);
+          return this.instance.general as unknown as Record<string, unknown>;
+        },
+      },
       {
         title: `${this.def.title} settings`,
         schema: this.def.settingsSchema ?? [],

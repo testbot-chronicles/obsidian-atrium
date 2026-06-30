@@ -6,6 +6,7 @@ import { getWidget, allWidgets } from "./registry";
 import { mountWidget, MountedWidget } from "./widgets/mount";
 import { WidgetSettingsPanel } from "./ui/WidgetSettingsPanel";
 import { applyAppearanceStyles } from "./appearance";
+import { resolveTitle } from "./general";
 import type { WidgetInstance } from "./types";
 
 /** Unique view type identifier for the Atrium homepage view. */
@@ -107,15 +108,17 @@ export class AtriumView extends ItemView {
       host.toggleClass("is-locked", !!inst.locked);
       this.hosts.set(inst.id, host);
       applyAppearanceStyles(host, inst.appearance);
+      const content = host.createDiv({ cls: "atrium-widget-content" });
+      this.refreshHeader(host, inst);
       try {
-        const handle = mountWidget(def.Component, host, {
+        const handle = mountWidget(def.Component, content, {
           app: this.app,
           plugin: this.plugin,
           instance: inst,
         });
         this.handles.set(inst.id, handle);
       } catch (e) {
-        host.setText("⚠️ widget error");
+        content.setText("⚠️ widget error");
         console.error("Atrium widget render failed:", inst.type, e);
       }
       const actions = host.createDiv({ cls: "atrium-widget-actions" });
@@ -168,13 +171,32 @@ export class AtriumView extends ItemView {
     }).open();
   }
 
-  /** Push the (mutated) instance config and appearance into the live widget. */
+  /** Push the (mutated) instance config, appearance, and header into the live widget. */
   private updateWidget(inst: WidgetInstance): void {
     const host = this.hosts.get(inst.id);
-    if (host) applyAppearanceStyles(host, inst.appearance);
+    if (host) {
+      applyAppearanceStyles(host, inst.appearance);
+      this.refreshHeader(host, inst);
+    }
     const handle = this.handles.get(inst.id);
     // Pass a fresh object so Svelte's reactivity ($: cfg = instance.config) re-runs.
     handle?.update({ instance: { ...inst, config: { ...inst.config } } });
+  }
+
+  /** (Re)build the card header for a widget host from its general settings. */
+  private refreshHeader(host: HTMLElement, inst: WidgetInstance): void {
+    host.querySelectorAll(":scope > .atrium-widget-header").forEach((e) => e.remove());
+    const def = getWidget(inst.type);
+    if (!def) return;
+    const t = resolveTitle(inst.general, def);
+    if (!t.show) return;
+    const content = host.querySelector(":scope > .atrium-widget-content") as HTMLElement | null;
+    if (!content) return;
+    const h = host.createDiv({ cls: "atrium-widget-header" }); // appended at end…
+    h.setText(t.text);
+    h.style.textAlign = t.align;
+    if (t.position === "bottom") content.insertAdjacentElement("afterend", h);
+    else host.insertBefore(h, content); // …relocated above content for "top"
   }
 
   /** Tear down all rendered widgets and re-render from the current layout. */
