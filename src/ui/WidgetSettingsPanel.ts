@@ -197,6 +197,59 @@ export class WidgetSettingsPanel {
           sync();
           break;
         }
+        case "orderlist": {
+          setting.settingEl.addClass("atrium-orderlist-setting");
+          const wrap = setting.controlEl.createDiv({ cls: "atrium-orderlist" });
+          const all = field.options ?? [];
+          const labelOf = (v: string): string => all.find((o) => o.value === v)?.label ?? v;
+          const renderList = (): void => {
+            wrap.empty();
+            const currentList: string[] = Array.isArray(get()[field.key])
+              ? [...(get()[field.key] as string[])]
+              : [];
+            const commit = (next: string[]): void => {
+              get()[field.key] = next;
+              this.changed();
+              renderList();
+            };
+            currentList.forEach((val, i) => {
+              const row = wrap.createDiv({ cls: "atrium-orderlist-row" });
+              row.createSpan({ cls: "atrium-orderlist-label", text: labelOf(val) });
+              const up = row.createEl("button", { text: "↑", attr: { "aria-label": "Move up" } });
+              up.disabled = i === 0;
+              up.onclick = () => {
+                const n = [...currentList];
+                [n[i - 1], n[i]] = [n[i], n[i - 1]];
+                commit(n);
+              };
+              const down = row.createEl("button", { text: "↓", attr: { "aria-label": "Move down" } });
+              down.disabled = i === currentList.length - 1;
+              down.onclick = () => {
+                const n = [...currentList];
+                [n[i + 1], n[i]] = [n[i], n[i + 1]];
+                commit(n);
+              };
+              const rm = row.createEl("button", { text: "✕", attr: { "aria-label": "Remove" } });
+              rm.onclick = () => {
+                const n = [...currentList];
+                n.splice(i, 1);
+                commit(n);
+              };
+            });
+            const unselected = all.filter((o) => !currentList.includes(o.value));
+            if (unselected.length) {
+              const addRow = wrap.createDiv({ cls: "atrium-orderlist-add" });
+              const sel = addRow.createEl("select", { cls: "dropdown" });
+              sel.createEl("option", { text: "+ Add…", value: "" });
+              for (const o of unselected) sel.createEl("option", { text: o.label, value: o.value });
+              sel.onchange = () => {
+                if (sel.value) commit([...currentList, sel.value]);
+              };
+            }
+          };
+          renderList();
+          break;
+        }
       }
       this.rows.push({ field, el: setting.settingEl, target: get });
     }

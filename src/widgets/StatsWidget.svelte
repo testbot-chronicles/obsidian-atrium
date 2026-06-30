@@ -32,7 +32,12 @@
   ];
   const CONTENT_KEYS = ["words", "characters", "readingTime"];
 
-  $: selected = DEFS.filter((d) => cfg["show_" + d.key]);
+  $: selectedKeys = Array.isArray(cfg.stats)
+    ? (cfg.stats as string[])
+    : DEFS.filter((d) => cfg["show_" + d.key]).map((d) => d.key);
+  $: selected = selectedKeys
+    .map((k) => DEFS.find((d) => d.key === k))
+    .filter((d): d is (typeof DEFS)[number] => !!d);
   $: needContent = selected.some((d) => CONTENT_KEYS.includes(d.key));
 
   let cheap: Record<string, number | string> = {};

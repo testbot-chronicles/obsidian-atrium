@@ -8,7 +8,8 @@ export type FieldType =
   | "toggle"
   | "select"
   | "slider"
-  | "buttons";
+  | "buttons"
+  | "orderlist";
 
 /** A single configurable field exposed in a widget's settings UI. */
 export interface SettingsField {
