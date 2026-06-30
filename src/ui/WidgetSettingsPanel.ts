@@ -1,4 +1,4 @@
-import { Setting } from "obsidian";
+import { Setting, setIcon } from "obsidian";
 import type { WidgetDef, SettingsField } from "../registry";
 import type { WidgetInstance } from "../types";
 import { APPEARANCE_SCHEMA, DEFAULT_APPEARANCE } from "../appearance";
@@ -18,6 +18,8 @@ interface Section {
   schema: SettingsField[];
   /** The live object whose keys the section's rows mutate in place. */
   target: () => Record<string, unknown>;
+  /** When true, the section renders collapsed (body hidden) on open. */
+  defaultCollapsed?: boolean;
 }
 
 /**
@@ -75,6 +77,7 @@ export class WidgetSettingsPanel {
       {
         title: "Appearance",
         schema: APPEARANCE_SCHEMA,
+        defaultCollapsed: true,
         target: () => {
           if (!this.instance.appearance) this.instance.appearance = { ...DEFAULT_APPEARANCE };
           return this.instance.appearance as unknown as Record<string, unknown>;
@@ -107,14 +110,27 @@ export class WidgetSettingsPanel {
     document.addEventListener("keydown", this.onKey);
   }
 
-  /** Build a heading and a row per schema field for one section, wiring live edits into its target. */
+  /**
+   * Build a collapsible group (clickable chevron header + body) and a row per
+   * schema field, wiring live edits into the section's target. Clicking the
+   * header toggles `is-collapsed`; sections flagged `defaultCollapsed` start hidden.
+   */
   private buildSection(body: HTMLElement, section: Section): void {
     if (section.schema.length === 0) return;
-    body.createEl("h4", { cls: "atrium-settings-section", text: section.title });
+    const group = body.createDiv({ cls: "atrium-settings-group" });
+    if (section.defaultCollapsed) group.addClass("is-collapsed");
+
+    const header = group.createDiv({ cls: "atrium-settings-section" });
+    const chevron = header.createSpan({ cls: "atrium-settings-chevron" });
+    setIcon(chevron, "chevron-down");
+    header.createSpan({ cls: "atrium-settings-section-title", text: section.title });
+    header.onclick = () => group.toggleClass("is-collapsed", !group.hasClass("is-collapsed"));
+
+    const content = group.createDiv({ cls: "atrium-settings-group-body" });
     const get = section.target;
 
     for (const field of section.schema) {
-      const setting = new Setting(body).setName(field.label);
+      const setting = new Setting(content).setName(field.label);
       const current = get()[field.key];
       switch (field.type) {
         case "text":

@@ -59,12 +59,17 @@
 }
 .atrium-settings-close:hover { color: var(--text-normal); }
 .atrium-settings-body { padding: 8px 12px; overflow-y: auto; }
+.atrium-settings-group { border-top: 1px solid var(--background-modifier-border); padding-top: 8px; margin-top: 10px; }
+.atrium-settings-body > .atrium-settings-group:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
 .atrium-settings-section {
-  margin: 14px 0 6px; padding-top: 10px;
-  font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--text-muted); border-top: 1px solid var(--background-modifier-border);
+  display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
+  margin-bottom: 6px; font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);
 }
-.atrium-settings-body > .atrium-settings-section:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
+.atrium-settings-section:hover { color: var(--text-normal); }
+.atrium-settings-chevron { display: inline-flex; transition: transform 0.15s ease; }
+.atrium-settings-chevron .svg-icon { width: 13px; height: 13px; }
+.atrium-settings-group.is-collapsed .atrium-settings-chevron { transform: rotate(-90deg); }
+.atrium-settings-group.is-collapsed .atrium-settings-group-body { display: none; }
 
 /* Visible snap grid — only in edit mode. Column lines every 1/cols, row lines every cell height. */
 .atrium-root.is-editing .grid-stack {
