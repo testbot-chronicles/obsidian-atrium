@@ -1,0 +1,5 @@
+.atrium-root { padding: 16px; height: 100%; overflow: auto; }
+.atrium-root .grid-stack { min-height: 100%; }
+.atrium-widget { background: var(--background-secondary); border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m); padding: 12px; height: 100%; overflow: auto; color: var(--text-normal); }
+.atrium-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px; }
