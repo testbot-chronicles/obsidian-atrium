@@ -1,0 +1,13 @@
+# dependencies
+node_modules/
+
+# build output (regenerated; released as GitHub asset, not committed during dev)
+# main.js  # uncomment if you prefer not to commit the build during dev
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+
+# obsidian local
+data.json
