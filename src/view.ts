@@ -19,8 +19,8 @@ export const VIEW_TYPE_ATRIUM = "atrium-home";
 export class AtriumView extends ItemView {
   /** The gridstack instance, created in {@link onOpen} and torn down in {@link onClose}. */
   grid?: GridStack;
-  /** Handles to mounted Svelte widget instances, destroyed on reload/close. */
-  private mounted: MountedWidget[] = [];
+  /** Handles to mounted Svelte widget instances, keyed by instance id. */
+  private handles = new Map<string, MountedWidget>();
   /**
    * When set, {@link persist} is a no-op. Guards against gridstack's `change`
    * event firing during programmatic grid mutations (add/removeAll), which would
@@ -92,13 +92,12 @@ export class AtriumView extends ItemView {
       const host = el.querySelector(".grid-stack-item-content") as HTMLElement;
       host.addClass("atrium-widget");
       try {
-        this.mounted.push(
-          mountWidget(def.Component, host, {
-            app: this.app,
-            plugin: this.plugin,
-            instance: inst,
-          }),
-        );
+        const handle = mountWidget(def.Component, host, {
+          app: this.app,
+          plugin: this.plugin,
+          instance: inst,
+        });
+        this.handles.set(inst.id, handle);
       } catch (e) {
         host.setText("⚠️ widget error");
         console.error("Atrium widget render failed:", inst.type, e);
@@ -113,22 +112,29 @@ export class AtriumView extends ItemView {
     this.suppressPersist = false;
   }
 
-  /** Open the settings modal for a widget instance; persist + reload on save. */
+  /** Open the settings modal for a widget instance; live-preview on change, persist on close. */
   private openSettings(inst: WidgetInstance): void {
     const def = getWidget(inst.type);
     if (!def) return;
-    new WidgetSettingsModal(this.app, def, inst, () => {
-      void this.plugin.saveAtrium();
-      this.reload();
+    new WidgetSettingsModal(this.app, def, inst, {
+      onChange: () => this.updateWidget(inst),
+      onCommit: () => void this.plugin.saveAtrium(),
     }).open();
+  }
+
+  /** Push the (mutated) instance config into its mounted component reactively. */
+  private updateWidget(inst: WidgetInstance): void {
+    const handle = this.handles.get(inst.id);
+    // Pass a fresh object so Svelte's reactivity ($: cfg = instance.config) re-runs.
+    handle?.update({ instance: { ...inst, config: { ...inst.config } } });
   }
 
   /** Tear down all rendered widgets and re-render from the current layout. */
   private reload(): void {
     this.suppressPersist = true;
-    this.mounted.forEach((m) => m.destroy());
-    this.mounted = [];
-    this.grid?.removeAll(false);
+    this.handles.forEach((h) => h.destroy());
+    this.handles.clear();
+    this.grid?.removeAll(true, false); // FIX: remove DOM, no change event
     this.suppressPersist = false;
     this.renderWidgets();
   }
@@ -177,8 +183,8 @@ export class AtriumView extends ItemView {
   }
 
   async onClose(): Promise<void> {
-    this.mounted.forEach((m) => m.destroy());
-    this.mounted = [];
+    this.handles.forEach((h) => h.destroy());
+    this.handles.clear();
     this.grid?.destroy(false);
     this.grid = undefined;
   }
