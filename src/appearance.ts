@@ -47,7 +47,7 @@ export const APPEARANCE_SCHEMA: SettingsField[] = [
   { key: "shadow", label: "Drop shadow", type: "toggle" },
   { key: "accent", label: "Accent color", type: "toggle" },
   { key: "accentColor", label: "Accent", type: "color", showIf: { key: "accent", equals: true } },
-  { key: "bgImage", label: "Image (vault path or URL)", type: "text", group: "Background image" },
+  { key: "bgImage", label: "Image (vault path or URL)", type: "image", group: "Background image" },
   { key: "bgFit", label: "Fit", type: "buttons", options: [ { value: "cover", label: "Cover" }, { value: "contain", label: "Contain" } ], group: "Background image" },
   { key: "bgPosition", label: "Position", type: "select", options: [ { value: "center", label: "Center" }, { value: "top", label: "Top" }, { value: "bottom", label: "Bottom" }, { value: "left", label: "Left" }, { value: "right", label: "Right" } ], group: "Background image" },
   { key: "bgImageOpacity", label: "Image opacity (%)", type: "slider", min: 0, max: 100, step: 1, group: "Background image" },

@@ -1,8 +1,22 @@
-import { Setting, setIcon } from "obsidian";
+import { App, FuzzySuggestModal, Setting, setIcon, TextComponent, TFile } from "obsidian";
 import type { WidgetDef, SettingsField } from "../registry";
 import type { WidgetInstance } from "../types";
 import { APPEARANCE_SCHEMA, DEFAULT_APPEARANCE } from "../appearance";
 import { GENERAL_SCHEMA, defaultGeneral } from "../general";
+
+/** Fuzzy picker over the vault's image files. */
+class ImagePickerModal extends FuzzySuggestModal<TFile> {
+  constructor(app: App, private onPick: (path: string) => void) {
+    super(app);
+    this.setPlaceholder("Search vault images…");
+  }
+  getItems(): TFile[] {
+    const exts = ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "avif", "ico"];
+    return this.app.vault.getFiles().filter((f) => exts.includes(f.extension.toLowerCase()));
+  }
+  getItemText(f: TFile): string { return f.path; }
+  onChooseItem(f: TFile): void { this.onPick(f.path); }
+}
 
 /** Callbacks the panel invokes to drive live preview and persistence. */
 export interface SettingsHooks {
@@ -41,6 +55,7 @@ export class WidgetSettingsPanel {
   };
 
   constructor(
+    private app: App,
     private def: WidgetDef,
     private instance: WidgetInstance,
     private hooks: SettingsHooks,
@@ -161,6 +176,31 @@ export class WidgetSettingsPanel {
               }),
           );
           break;
+        case "image": {
+          let textComp: TextComponent | undefined;
+          setting.addText((t) => {
+            textComp = t;
+            t.setPlaceholder(field.placeholder ?? "Vault path or URL")
+              .setValue(current == null ? "" : String(current))
+              .onChange((v) => {
+                get()[field.key] = v;
+                this.changed();
+              });
+          });
+          setting.addExtraButton((b) =>
+            b
+              .setIcon("image-plus")
+              .setTooltip("Browse vault images")
+              .onClick(() => {
+                new ImagePickerModal(this.app, (path) => {
+                  get()[field.key] = path;
+                  textComp?.setValue(path);
+                  this.changed();
+                }).open();
+              }),
+          );
+          break;
+        }
         case "number":
           setting.addText((t) => {
             t.inputEl.type = "number";

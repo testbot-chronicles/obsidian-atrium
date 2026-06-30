@@ -84,7 +84,7 @@ export function registerAllWidgets(): void {
       link: "", grayscale: false, opacity: 100,
     },
     settingsSchema: [
-      { key: "src", label: "Image path or URL", type: "text" },
+      { key: "src", label: "Image path or URL", type: "image" },
       { key: "fit", label: "Fit", type: "buttons", options: [
         { value: "contain", label: "Contain" }, { value: "cover", label: "Cover" }, { value: "fill", label: "Fill" } ] },
       { key: "scale", label: "Image size (%)", type: "slider", min: 10, max: 100, step: 1 },

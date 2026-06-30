@@ -174,7 +174,7 @@ export class AtriumView extends ItemView {
   private openSettings(inst: WidgetInstance): void {
     const def = getWidget(inst.type);
     if (!def) return;
-    new WidgetSettingsPanel(def, inst, {
+    new WidgetSettingsPanel(this.app, def, inst, {
       onChange: () => this.updateWidget(inst),
       onCommit: () => void this.plugin.saveAtrium(),
     }).open();
