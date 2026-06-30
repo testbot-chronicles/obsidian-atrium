@@ -60,3 +60,54 @@ export function groupByFolder(items: RecentItem[]): RecentGroup[] {
   }
   return [...map.entries()].map(([folder, items]) => ({ folder, items }));
 }
+
+/** Lucide icon name for a file extension. */
+export function iconFor(ext: string): string {
+  if (ext === "md") return "file-text";
+  if (["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp"].includes(ext)) return "image";
+  if (ext === "pdf") return "file-text";
+  if (["mp3", "wav", "ogg", "m4a", "flac"].includes(ext)) return "music";
+  if (["mp4", "mov", "webm", "mkv"].includes(ext)) return "film";
+  return "file";
+}
+
+/** A node in the nested folder tree: either a folder (with children) or a file (a leaf). */
+export interface TreeNode {
+  key: string;
+  name: string;
+  type: "folder" | "file";
+  path?: string;
+  ext?: string;
+  mtime?: number;
+  children?: TreeNode[];
+}
+
+/**
+ * Build a nested folder tree from a flat list of items, deriving folder nodes
+ * from each item's path segments. Folder and file order follow first-seen order;
+ * root-level files appear at the top level.
+ *
+ * @param items - Already-ordered items.
+ * @returns The top-level tree nodes (the synthetic root's children).
+ */
+export function buildTree(items: RecentItem[]): TreeNode[] {
+  const root: TreeNode = { key: "", name: "", type: "folder", children: [] };
+  const byPrefix = new Map<string, TreeNode>([["", root]]);
+  for (const it of items) {
+    const segs = it.folder ? it.folder.split("/") : [];
+    let parent = root;
+    let prefix = "";
+    for (const seg of segs) {
+      prefix = prefix ? `${prefix}/${seg}` : seg;
+      let node = byPrefix.get(prefix);
+      if (!node) {
+        node = { key: prefix, name: seg, type: "folder", children: [] };
+        byPrefix.set(prefix, node);
+        parent.children!.push(node);
+      }
+      parent = node;
+    }
+    parent.children!.push({ key: it.path, name: it.name, type: "file", path: it.path, ext: it.ext, mtime: it.mtime });
+  }
+  return root.children!;
+}

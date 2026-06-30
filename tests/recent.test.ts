@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { orderRecent, groupByFolder, type RecentItem } from "../src/lib/recent";
+import { orderRecent, groupByFolder, buildTree, iconFor, type RecentItem } from "../src/lib/recent";
 
 const mk = (over: Partial<RecentItem> = {}): RecentItem =>
   ({ path: "a.md", name: "a", folder: "", ext: "md", mtime: 0, ctime: 0, ...over });
@@ -42,5 +42,48 @@ describe("groupByFolder", () => {
   });
   it("uses '/' for root-level items", () => {
     expect(groupByFolder([mk({ path: "a.md", folder: "" })])[0].folder).toBe("/");
+  });
+});
+
+describe("iconFor", () => {
+  it("maps known extensions", () => {
+    expect(iconFor("md")).toBe("file-text");
+    expect(iconFor("png")).toBe("image");
+    expect(iconFor("mp3")).toBe("music");
+    expect(iconFor("xyz")).toBe("file");
+  });
+});
+
+describe("buildTree", () => {
+  const mk = (over: Partial<RecentItem> = {}): RecentItem =>
+    ({ path: "a.md", name: "a", folder: "", ext: "md", mtime: 0, ctime: 0, ...over });
+
+  it("puts root-level files at the top level", () => {
+    const tree = buildTree([mk({ path: "a.md", name: "a", folder: "" })]);
+    expect(tree).toHaveLength(1);
+    expect(tree[0]).toMatchObject({ type: "file", name: "a", path: "a.md" });
+  });
+  it("creates a folder node with file children", () => {
+    const tree = buildTree([
+      mk({ path: "T/3.md", name: "3", folder: "T" }),
+      mk({ path: "T/2.md", name: "2", folder: "T" }),
+    ]);
+    expect(tree).toHaveLength(1);
+    expect(tree[0]).toMatchObject({ type: "folder", name: "T" });
+    expect(tree[0].children?.map((c) => c.name)).toEqual(["3", "2"]);
+  });
+  it("nests folders by path segments", () => {
+    const tree = buildTree([mk({ path: "A/B/c.md", name: "c", folder: "A/B" })]);
+    expect(tree[0]).toMatchObject({ type: "folder", name: "A" });
+    expect(tree[0].children?.[0]).toMatchObject({ type: "folder", name: "B" });
+    expect(tree[0].children?.[0].children?.[0]).toMatchObject({ type: "file", name: "c" });
+  });
+  it("preserves first-seen folder order", () => {
+    const tree = buildTree([
+      mk({ path: "X/a.md", folder: "X" }),
+      mk({ path: "Y/b.md", folder: "Y" }),
+      mk({ path: "X/c.md", folder: "X" }),
+    ]);
+    expect(tree.map((n) => n.name)).toEqual(["X", "Y"]);
   });
 });
