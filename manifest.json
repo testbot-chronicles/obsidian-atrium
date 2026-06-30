@@ -1,0 +1,9 @@
+{
+  "id": "atrium",
+  "name": "Atrium",
+  "version": "0.0.1",
+  "minAppVersion": "1.5.0",
+  "description": "A modular, drag-and-drop homepage for your vault.",
+  "author": "Titus",
+  "isDesktopOnly": false
+}
