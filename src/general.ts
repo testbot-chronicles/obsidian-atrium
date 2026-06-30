@@ -8,10 +8,12 @@ export interface WidgetGeneral {
   titlePosition: string; // "top" | "bottom"
 }
 
-/** Defaults for a widget; a widget with a `defaultTitle` shows its header by default. */
+/** Defaults for a widget; a widget with a `defaultTitle` shows its header by default.
+ * `title` stays empty (override semantics): an empty title falls back to the widget's
+ * default title at render, and the settings field shows that default as a placeholder. */
 export function defaultGeneral(defaultTitle?: string): WidgetGeneral {
   return {
-    title: defaultTitle ?? "",
+    title: "",
     showTitle: defaultTitle != null,
     titleAlign: "left",
     titlePosition: "top",

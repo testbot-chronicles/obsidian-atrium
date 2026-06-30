@@ -59,7 +59,9 @@ export class WidgetSettingsPanel {
     return [
       {
         title: "General",
-        schema: GENERAL_SCHEMA,
+        schema: GENERAL_SCHEMA.map((f) =>
+          f.key === "title" ? { ...f, placeholder: this.def.defaultTitle ?? this.def.title } : f,
+        ),
         target: () => {
           if (!this.instance.general) this.instance.general = defaultGeneral(this.def.defaultTitle);
           return this.instance.general as unknown as Record<string, unknown>;
@@ -117,10 +119,13 @@ export class WidgetSettingsPanel {
       switch (field.type) {
         case "text":
           setting.addText((t) =>
-            t.setValue(current == null ? "" : String(current)).onChange((v) => {
-              get()[field.key] = v;
-              this.changed();
-            }),
+            t
+              .setPlaceholder(field.placeholder ?? "")
+              .setValue(current == null ? "" : String(current))
+              .onChange((v) => {
+                get()[field.key] = v;
+                this.changed();
+              }),
           );
           break;
         case "number":

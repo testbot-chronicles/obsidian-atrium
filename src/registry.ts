@@ -23,6 +23,8 @@ export interface SettingsField {
   step?: number;
   /** Only show this field when another field has a given value. */
   showIf?: { key: string; equals: unknown };
+  /** Placeholder text for a `text` field, shown when the value is empty. */
+  placeholder?: string;
 }
 
 /** Definition describing how to render and configure a widget type. */
