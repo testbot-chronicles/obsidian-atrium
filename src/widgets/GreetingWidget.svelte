@@ -27,6 +27,12 @@
   $: countdownLabel = cfg.countdownLabel ?? "";
   $: countdownSize = typeof cfg.countdownSize === "number" ? cfg.countdownSize : 16;
 
+  $: greetingColor = typeof cfg.greetingColor === "string" && cfg.greetingColor ? cfg.greetingColor : "var(--text-normal)";
+  $: clockColor = typeof cfg.clockColor === "string" && cfg.clockColor ? cfg.clockColor : "var(--atrium-accent, var(--text-normal))";
+  $: worldColor = typeof cfg.worldColor === "string" && cfg.worldColor ? cfg.worldColor : "var(--text-muted)";
+  $: dateColor = typeof cfg.dateColor === "string" && cfg.dateColor ? cfg.dateColor : "var(--text-muted)";
+  $: countdownColor = typeof cfg.countdownColor === "string" && cfg.countdownColor ? cfg.countdownColor : "var(--text-muted)";
+
   let now = new Date();
   let timer: ReturnType<typeof setInterval> | undefined;
   onMount(() => { timer = setInterval(() => (now = new Date()), 1000); });
@@ -82,15 +88,15 @@
 <div class="atrium-greeting" style={`text-align:${alignment};`}>
   {#each elements as el (el)}
     {#if el === "greeting"}
-      <div class="atrium-greeting-hello" style={`font-size:${greetingSize}px`}>{emoji ? emoji + " " : ""}{hello}</div>
+      <div class="atrium-greeting-hello" style={`font-size:${greetingSize}px;color:${greetingColor}`}>{emoji ? emoji + " " : ""}{hello}</div>
     {:else if el === "clock"}
-      <div class="atrium-greeting-time" class:is-blink={blinkColon} style={`font-size:${clockSize}px`}>{t.hh}<span class="colon">:</span>{t.mm}{#if showSeconds}<span class="colon">:</span>{t.ss}{/if}{t.ampm}</div>
+      <div class="atrium-greeting-time" class:is-blink={blinkColon} style={`font-size:${clockSize}px;color:${clockColor}`}>{t.hh}<span class="colon">:</span>{t.mm}{#if showSeconds}<span class="colon">:</span>{t.ss}{/if}{t.ampm}</div>
     {:else if el === "worldClock"}
-      {#if worldText}<div class="atrium-greeting-world" style={`font-size:${worldSize}px`}>{worldLabel ? worldLabel + " " : ""}{worldText}</div>{/if}
+      {#if worldText}<div class="atrium-greeting-world" style={`font-size:${worldSize}px;color:${worldColor}`}>{worldLabel ? worldLabel + " " : ""}{worldText}</div>{/if}
     {:else if el === "date"}
-      <div class="atrium-greeting-date" style={`font-size:${dateSize}px`}>{dateText}</div>
+      <div class="atrium-greeting-date" style={`font-size:${dateSize}px;color:${dateColor}`}>{dateText}</div>
     {:else if el === "countdown"}
-      {#if countdownText}<div class="atrium-greeting-countdown" style={`font-size:${countdownSize}px`}>{countdownText}</div>{/if}
+      {#if countdownText}<div class="atrium-greeting-countdown" style={`font-size:${countdownSize}px;color:${countdownColor}`}>{countdownText}</div>{/if}
     {/if}
   {/each}
 </div>

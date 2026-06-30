@@ -154,6 +154,7 @@ export function registerAllWidgets(): void {
       dateStyle: "full", showWeekNumber: false, dateSize: 14,
       worldTimezone: "", worldLabel: "", worldSize: 18,
       countdownDate: "", countdownLabel: "", countdownSize: 16,
+      greetingColor: "", clockColor: "", worldColor: "", dateColor: "", countdownColor: "",
     },
     settingsSchema: [
       { key: "elements", label: "Elements shown", type: "orderlist", options: [
@@ -167,19 +168,24 @@ export function registerAllWidgets(): void {
       { key: "msgNight", label: "Night message", type: "text", placeholder: "Good night", group: "Greeting" },
       { key: "showEmoji", label: "Time-of-day emoji", type: "toggle", group: "Greeting" },
       { key: "greetingSize", label: "Greeting size (px)", type: "slider", min: 12, max: 48, step: 1, group: "Greeting" },
+      { key: "greetingColor", label: "Color", type: "color", group: "Greeting" },
       { key: "use24h", label: "24-hour", type: "toggle", group: "Clock" },
       { key: "showSeconds", label: "Show seconds", type: "toggle", group: "Clock" },
       { key: "blinkColon", label: "Blinking colon", type: "toggle", group: "Clock" },
       { key: "clockSize", label: "Clock size (px)", type: "slider", min: 16, max: 96, step: 1, group: "Clock" },
+      { key: "clockColor", label: "Color", type: "color", group: "Clock" },
       { key: "dateStyle", label: "Date format", type: "select", options: [ { value: "full", label: "Weekday, day month" }, { value: "long", label: "Day month year" }, { value: "short", label: "Numeric" } ], group: "Date" },
       { key: "showWeekNumber", label: "Week number", type: "toggle", group: "Date" },
       { key: "dateSize", label: "Date size (px)", type: "slider", min: 10, max: 32, step: 1, group: "Date" },
+      { key: "dateColor", label: "Color", type: "color", group: "Date" },
       { key: "worldTimezone", label: "Timezone (IANA, e.g. America/New_York)", type: "text", group: "World clock" },
       { key: "worldLabel", label: "Label", type: "text", group: "World clock" },
       { key: "worldSize", label: "Size (px)", type: "slider", min: 12, max: 48, step: 1, group: "World clock" },
+      { key: "worldColor", label: "Color", type: "color", group: "World clock" },
       { key: "countdownDate", label: "Target date (YYYY-MM-DD)", type: "text", placeholder: "2026-12-31", group: "Countdown" },
       { key: "countdownLabel", label: "Label", type: "text", group: "Countdown" },
       { key: "countdownSize", label: "Size (px)", type: "slider", min: 12, max: 32, step: 1, group: "Countdown" },
+      { key: "countdownColor", label: "Color", type: "color", group: "Countdown" },
     ],
   });
 }
