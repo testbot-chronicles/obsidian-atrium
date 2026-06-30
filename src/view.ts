@@ -4,7 +4,7 @@ import type AtriumPlugin from "./main";
 import { fromGridNodes } from "./lib/layout";
 import { getWidget, allWidgets } from "./registry";
 import { mountWidget, MountedWidget } from "./widgets/mount";
-import { WidgetSettingsModal } from "./ui/WidgetSettingsModal";
+import { WidgetSettingsPanel } from "./ui/WidgetSettingsPanel";
 import type { WidgetInstance } from "./types";
 
 /** Unique view type identifier for the Atrium homepage view. */
@@ -112,11 +112,11 @@ export class AtriumView extends ItemView {
     this.suppressPersist = false;
   }
 
-  /** Open the settings modal for a widget instance; live-preview on change, persist on close. */
+  /** Open the floating settings panel for a widget instance; live-preview on change, persist on close. */
   private openSettings(inst: WidgetInstance): void {
     const def = getWidget(inst.type);
     if (!def) return;
-    new WidgetSettingsModal(this.app, def, inst, {
+    new WidgetSettingsPanel(def, inst, {
       onChange: () => this.updateWidget(inst),
       onCommit: () => void this.plugin.saveAtrium(),
     }).open();
@@ -183,6 +183,8 @@ export class AtriumView extends ItemView {
   }
 
   async onClose(): Promise<void> {
+    // Close any lingering panel before grid teardown so it doesn't orphan in document.body.
+    WidgetSettingsPanel.closeCurrent();
     this.handles.forEach((h) => h.destroy());
     this.handles.clear();
     this.grid?.destroy(false);

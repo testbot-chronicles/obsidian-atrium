@@ -1,65 +1,78 @@
-import { App, Modal, Setting } from "obsidian";
+import { Setting } from "obsidian";
 import type { WidgetDef, SettingsField } from "../registry";
 import type { WidgetInstance } from "../types";
 
-/** Callbacks the modal invokes to drive live preview and persistence. */
+/** Callbacks the panel invokes to drive live preview and persistence. */
 export interface SettingsHooks {
   /** Live preview: called after each field change. */
   onChange: () => void;
-  /** Persist: called once when the modal closes. */
+  /** Persist: called once when the panel closes. */
   onCommit: () => void;
 }
 
 /**
- * Generic per-widget settings dialog. Builds rows from the widget's
- * {@link WidgetDef.settingsSchema}, applies changes live to `instance.config`,
- * and persists on close. Supports `slider` and `buttons` field types plus
- * `showIf` conditional visibility.
+ * Floating, non-modal, draggable settings panel for a widget instance.
+ * Edits `instance.config` live (no backdrop, no blocking) and persists on close.
+ * Only one panel is open at a time.
  */
-export class WidgetSettingsModal extends Modal {
+export class WidgetSettingsPanel {
+  private static current: WidgetSettingsPanel | null = null;
+
+  private el!: HTMLElement;
   private rows: { field: SettingsField; el: HTMLElement }[] = [];
+  private onKey = (e: KeyboardEvent): void => {
+    if (e.key === "Escape") this.close();
+  };
 
   constructor(
-    app: App,
     private def: WidgetDef,
     private instance: WidgetInstance,
     private hooks: SettingsHooks,
-  ) {
-    super(app);
+  ) {}
+
+  /** Close whatever panel is currently open (if any). */
+  static closeCurrent(): void {
+    WidgetSettingsPanel.current?.close();
   }
 
-  /** The live config object the modal mutates in place. */
+  /** The live config object the panel mutates in place. */
   private cfg(): Record<string, unknown> {
     return this.instance.config;
   }
 
-  /** Show/hide rows whose `showIf` condition is (un)met. */
-  private applyVisibility(): void {
-    for (const { field, el } of this.rows) {
-      const visible =
-        !field.showIf || this.cfg()[field.showIf.key] === field.showIf.equals;
-      el.style.display = visible ? "" : "none";
-    }
-  }
+  /** Mount the panel into `document.body`, replacing any panel already open. */
+  open(): void {
+    WidgetSettingsPanel.current?.close();
+    WidgetSettingsPanel.current = this;
 
-  /** Re-evaluate conditional rows and fire the live-preview hook. */
-  private changed(): void {
+    this.el = document.body.createDiv({ cls: "atrium-settings-panel" });
+
+    const header = this.el.createDiv({ cls: "atrium-settings-header" });
+    header.createSpan({ text: `${this.def.title} settings` });
+    const closeBtn = header.createEl("button", {
+      cls: "atrium-settings-close",
+      text: "✕",
+    });
+    closeBtn.setAttr("aria-label", "Close");
+    closeBtn.onclick = () => this.close();
+    header.addEventListener("mousedown", (e) => this.startDrag(e));
+
+    const body = this.el.createDiv({ cls: "atrium-settings-body" });
+    this.buildRows(body);
     this.applyVisibility();
-    this.hooks.onChange();
+
+    document.addEventListener("keydown", this.onKey);
   }
 
-  onOpen(): void {
-    const { contentEl } = this;
-    contentEl.empty();
-    contentEl.createEl("h3", { text: `${this.def.title} settings` });
-
+  /** Build a settings row per schema field, wiring live edits into `instance.config`. */
+  private buildRows(body: HTMLElement): void {
     const schema = this.def.settingsSchema ?? [];
     if (schema.length === 0) {
-      contentEl.createEl("p", { text: "This widget has no settings." });
+      body.createEl("p", { text: "This widget has no settings." });
     }
 
     for (const field of schema) {
-      const setting = new Setting(contentEl).setName(field.label);
+      const setting = new Setting(body).setName(field.label);
       const current = this.cfg()[field.key];
       switch (field.type) {
         case "text":
@@ -145,12 +158,50 @@ export class WidgetSettingsModal extends Modal {
       }
       this.rows.push({ field, el: setting.settingEl });
     }
-
-    this.applyVisibility();
   }
 
-  onClose(): void {
+  /** Show/hide rows whose `showIf` condition is (un)met. */
+  private applyVisibility(): void {
+    for (const { field, el } of this.rows) {
+      const visible =
+        !field.showIf || this.cfg()[field.showIf.key] === field.showIf.equals;
+      el.style.display = visible ? "" : "none";
+    }
+  }
+
+  /** Re-evaluate conditional rows and fire the live-preview hook. */
+  private changed(): void {
+    this.applyVisibility();
+    this.hooks.onChange();
+  }
+
+  /** Drag the panel by its header, constrained to the viewport. */
+  private startDrag(e: MouseEvent): void {
+    if ((e.target as HTMLElement).closest("button")) return; // ignore drags starting on the close button
+    e.preventDefault();
+    const rect = this.el.getBoundingClientRect();
+    const offX = e.clientX - rect.left;
+    const offY = e.clientY - rect.top;
+    const move = (ev: MouseEvent): void => {
+      const x = Math.min(window.innerWidth - 60, Math.max(0, ev.clientX - offX));
+      const y = Math.min(window.innerHeight - 40, Math.max(0, ev.clientY - offY));
+      this.el.style.left = `${x}px`;
+      this.el.style.top = `${y}px`;
+      this.el.style.right = "auto";
+    };
+    const up = (): void => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+    };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  }
+
+  /** Tear down the panel, detach listeners, and persist once. */
+  close(): void {
+    document.removeEventListener("keydown", this.onKey);
+    this.el?.remove();
+    if (WidgetSettingsPanel.current === this) WidgetSettingsPanel.current = null;
     this.hooks.onCommit();
-    this.contentEl.empty();
   }
 }
