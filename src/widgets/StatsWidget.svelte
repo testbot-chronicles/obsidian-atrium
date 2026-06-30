@@ -88,11 +88,17 @@
   onMount(() => { recomputeCheap(); });
   $: if (needContent && content.words === null && app) recomputeContent();
 
-  function valueOf(key: string): string {
-    if (key in cheap) return String(cheap[key]);
-    if (key in content) return content[key] === null ? "…" : String(content[key]);
-    return "…";
-  }
+  // A reactive map the markup consumes, so it re-renders when `cheap`/`content`
+  // update. A function called from markup would NOT register these as Svelte
+  // dependencies, leaving the display stuck on the first render's placeholder.
+  $: values = Object.fromEntries(
+    selected.map((d) => {
+      const k = d.key;
+      if (k in cheap) return [k, String(cheap[k])];
+      if (k in content) return [k, content[k] === null ? "…" : String(content[k])];
+      return [k, "…"];
+    }),
+  );
   function icon(node: HTMLElement, name: string) {
     setIcon(node, name);
     return { update(n: string) { node.empty(); setIcon(node, n); } };
@@ -107,9 +113,9 @@
       {#if showIcons}<span class="atrium-stat-icon" use:icon={d.icon}></span>{/if}
       {#if compact}
         <span class="atrium-stat-label">{d.label}</span>
-        <span class="atrium-stat-num" style={`font-size:${Math.max(12, Math.round(numberSize * 0.6))}px`}>{valueOf(d.key)}</span>
+        <span class="atrium-stat-num" style={`font-size:${Math.max(12, Math.round(numberSize * 0.6))}px`}>{values[d.key]}</span>
       {:else}
-        <span class="atrium-stat-num" style={`font-size:${numberSize}px`}>{valueOf(d.key)}</span>
+        <span class="atrium-stat-num" style={`font-size:${numberSize}px`}>{values[d.key]}</span>
         <span class="atrium-stat-label">{d.label}</span>
       {/if}
     </div>
