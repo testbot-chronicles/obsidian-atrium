@@ -56,13 +56,24 @@
 }
 .atrium-settings-close:hover { color: var(--text-normal); }
 .atrium-settings-body { padding: 8px 12px; overflow-y: auto; }
-.atrium-settings-group { border-top: 1px solid var(--background-modifier-border); padding-top: 8px; margin-top: 10px; }
-.atrium-settings-body > .atrium-settings-group:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
+.atrium-settings-group {
+  margin: 8px 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-primary);
+  overflow: hidden;
+}
+.atrium-settings-body > .atrium-settings-group:first-child { margin-top: 4px; }
 .atrium-settings-section {
   display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
-  margin-bottom: 6px; font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);
+  padding: 8px 12px; margin: 0;
+  font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);
+  transition: background 0.12s ease, color 0.12s ease;
 }
-.atrium-settings-section:hover { color: var(--text-normal); }
+.atrium-settings-section:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.atrium-settings-group:not(.is-collapsed) .atrium-settings-section { border-bottom: 1px solid var(--background-modifier-border); }
+.atrium-settings-group-body { padding: 4px 12px 8px; }
+.atrium-settings-section .atrium-settings-chevron { color: var(--text-accent); }
 .atrium-settings-chevron { display: inline-flex; transition: transform 0.15s ease; }
 .atrium-settings-chevron .svg-icon { width: 13px; height: 13px; }
 .atrium-settings-group.is-collapsed .atrium-settings-chevron { transform: rotate(-90deg); }
@@ -93,7 +104,7 @@
   margin: 6px 0;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-s);
-  background: var(--background-primary);
+  background: var(--background-secondary);
   overflow: hidden;
 }
 .atrium-settings-subheader {
@@ -138,8 +149,6 @@
 .atrium-settings-panel .setting-item-control { flex-shrink: 0; }
 .atrium-settings-panel .setting-item-control input[type="text"],
 .atrium-settings-panel .setting-item-control input[type="number"] { font-size: 0.85em; }
-.atrium-settings-group { padding-top: 8px; margin-top: 8px; }
-.atrium-settings-section { margin-bottom: 3px; }
 .atrium-settings-subgroup-body .setting-item { padding: 5px 0; }
 .atrium-orderlist-setting .setting-item-info { margin-bottom: 4px; }
 .atrium-orderlist-row button { padding: 1px 6px; font-size: 0.9em; }
