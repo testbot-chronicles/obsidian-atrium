@@ -79,11 +79,22 @@ export function registerAllWidgets(): void {
   registerWidget({
     type: "logo", title: "Logo / Image", icon: "image", defaultSize: { w: 3, h: 3 },
     Component: LogoWidget as never,
-    defaultConfig: { src: "", fit: "contain", rounded: false },
+    defaultConfig: {
+      src: "", fit: "contain", scale: 100, halign: "center", valign: "center",
+      link: "", grayscale: false, opacity: 100,
+    },
     settingsSchema: [
       { key: "src", label: "Image path or URL", type: "text" },
-      { key: "fit", label: "Fit", type: "buttons", options: [ { value: "contain", label: "Contain" }, { value: "cover", label: "Cover" }, { value: "fill", label: "Fill" } ] },
-      { key: "rounded", label: "Rounded corners", type: "toggle" },
+      { key: "fit", label: "Fit", type: "buttons", options: [
+        { value: "contain", label: "Contain" }, { value: "cover", label: "Cover" }, { value: "fill", label: "Fill" } ] },
+      { key: "scale", label: "Image size (%)", type: "slider", min: 10, max: 100, step: 1 },
+      { key: "halign", label: "Horizontal position", type: "buttons", options: [
+        { value: "flex-start", label: "Left" }, { value: "center", label: "Center" }, { value: "flex-end", label: "Right" } ] },
+      { key: "valign", label: "Vertical position", type: "buttons", options: [
+        { value: "flex-start", label: "Top" }, { value: "center", label: "Middle" }, { value: "flex-end", label: "Bottom" } ] },
+      { key: "link", label: "Open on click (note or URL)", type: "text" },
+      { key: "grayscale", label: "Grayscale", type: "toggle" },
+      { key: "opacity", label: "Opacity (%)", type: "slider", min: 10, max: 100, step: 1 },
     ],
   });
   registerWidget({

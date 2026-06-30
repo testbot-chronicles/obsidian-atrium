@@ -71,3 +71,6 @@
   box-shadow: inset 0 0 0 1px var(--background-modifier-border);
 }
 
+/* Don't navigate when clicking a linked logo while arranging the layout. */
+.atrium-root.is-editing .atrium-logo-link { pointer-events: none; }
+
