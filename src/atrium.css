@@ -67,10 +67,10 @@
 .atrium-settings-section {
   display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
   padding: 8px 12px; margin: 0;
-  font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);
-  transition: background 0.12s ease, color 0.12s ease;
+  font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-accent);
+  transition: background 0.12s ease;
 }
-.atrium-settings-section:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.atrium-settings-section:hover { background: var(--background-modifier-hover); }
 .atrium-settings-group:not(.is-collapsed) .atrium-settings-section { border-bottom: 1px solid var(--background-modifier-border); }
 .atrium-settings-group-body { padding: 4px 12px 8px; }
 .atrium-settings-section .atrium-settings-chevron { color: var(--text-accent); }
