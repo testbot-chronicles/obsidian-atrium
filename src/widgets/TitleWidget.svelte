@@ -17,7 +17,7 @@
     cfg.fontFamily === "serif" ? "Georgia, 'Times New Roman', serif"
     : cfg.fontFamily === "monospace" ? "var(--font-monospace, monospace)"
     : "inherit";
-  $: color = cfg.customColor && typeof cfg.color === "string" ? cfg.color : "var(--text-normal)";
+  $: color = cfg.customColor && typeof cfg.color === "string" ? cfg.color : "var(--atrium-accent, var(--text-normal))";
   $: transform = cfg.uppercase ? "uppercase" : "none";
   $: fontStyle = cfg.italic ? "italic" : "normal";
   $: letterSpacing = `${typeof cfg.letterSpacing === "number" ? cfg.letterSpacing : 0}px`;
