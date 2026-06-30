@@ -2,6 +2,7 @@ import { Plugin } from "obsidian";
 import { AtriumData } from "./types";
 import { migrate } from "./lib/migrate";
 import { AtriumView, VIEW_TYPE_ATRIUM } from "./view";
+import { registerAllWidgets } from "./widgets";
 
 /**
  * Atrium — a modular, drag-and-drop homepage for your vault.
@@ -16,6 +17,8 @@ export default class AtriumPlugin extends Plugin {
   async onload(): Promise<void> {
     this.data = migrate(await this.loadData());
     await this.saveAtrium();
+
+    registerAllWidgets();
 
     this.registerView(VIEW_TYPE_ATRIUM, (leaf) => new AtriumView(leaf, this));
     this.addRibbonIcon("layout-dashboard", "Open Atrium", () => this.activateView());
