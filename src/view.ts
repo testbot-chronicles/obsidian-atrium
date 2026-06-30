@@ -142,6 +142,14 @@ export class AtriumView extends ItemView {
         void this.plugin.saveAtrium();
       };
 
+      const refreshBtn = actions.createEl("button", { cls: "atrium-widget-action" });
+      refreshBtn.setAttr("aria-label", "Refresh widget");
+      setIcon(refreshBtn, "refresh-cw");
+      refreshBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.refreshWidget(inst);
+      };
+
       const del = actions.createEl("button", { cls: "atrium-widget-action" });
       del.setAttr("aria-label", "Remove widget");
       setIcon(del, "trash-2");
@@ -181,6 +189,23 @@ export class AtriumView extends ItemView {
     const handle = this.handles.get(inst.id);
     // Pass a fresh object so Svelte's reactivity ($: cfg = instance.config) re-runs.
     handle?.update({ instance: { ...inst, config: { ...inst.config } } });
+  }
+
+  /** Re-mount a widget's component so it recomputes (e.g. Stats counts, Recent list). */
+  private refreshWidget(inst: WidgetInstance): void {
+    const host = this.hosts.get(inst.id);
+    const def = getWidget(inst.type);
+    if (!host || !def) return;
+    const content = host.querySelector(":scope > .atrium-widget-content") as HTMLElement | null;
+    if (!content) return;
+    this.handles.get(inst.id)?.destroy();
+    content.empty();
+    try {
+      this.handles.set(inst.id, mountWidget(def.Component, content, { app: this.app, plugin: this.plugin, instance: inst }));
+    } catch (e) {
+      content.setText("⚠️ widget error");
+      console.error("Atrium refresh failed:", inst.type, e);
+    }
   }
 
   /** (Re)build the card header for a widget host from its general settings. */
