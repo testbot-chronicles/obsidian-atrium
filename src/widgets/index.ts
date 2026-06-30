@@ -10,5 +10,10 @@ export function registerAllWidgets(): void {
     defaultSize: { w: 12, h: 2 },
     Component: TitleWidget as never,
     defaultConfig: { text: "My Vault" },
+    settingsSchema: [
+      { key: "text", label: "Text", type: "text" },
+      { key: "size", label: "Font size (CSS, e.g. 2.5rem)", type: "text" },
+      { key: "color", label: "Color", type: "color" },
+    ],
   });
 }

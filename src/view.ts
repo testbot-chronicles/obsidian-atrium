@@ -4,6 +4,7 @@ import type AtriumPlugin from "./main";
 import { fromGridNodes } from "./lib/layout";
 import { getWidget, allWidgets } from "./registry";
 import { mountWidget, MountedWidget } from "./widgets/mount";
+import { WidgetSettingsModal } from "./ui/WidgetSettingsModal";
 import type { WidgetInstance } from "./types";
 
 /** Unique view type identifier for the Atrium homepage view. */
@@ -102,8 +103,24 @@ export class AtriumView extends ItemView {
         host.setText("⚠️ widget error");
         console.error("Atrium widget render failed:", inst.type, e);
       }
+      const gear = host.createEl("button", { cls: "atrium-widget-gear", text: "⚙" });
+      gear.setAttr("aria-label", "Widget settings");
+      gear.onclick = (e) => {
+        e.stopPropagation();
+        this.openSettings(inst);
+      };
     }
     this.suppressPersist = false;
+  }
+
+  /** Open the settings modal for a widget instance; persist + reload on save. */
+  private openSettings(inst: WidgetInstance): void {
+    const def = getWidget(inst.type);
+    if (!def) return;
+    new WidgetSettingsModal(this.app, def, inst, () => {
+      void this.plugin.saveAtrium();
+      this.reload();
+    }).open();
   }
 
   /** Tear down all rendered widgets and re-render from the current layout. */
