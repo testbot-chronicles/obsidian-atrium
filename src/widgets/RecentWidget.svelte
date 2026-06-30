@@ -1,52 +1,107 @@
 <script lang="ts">
+  import { setIcon, TFile } from "obsidian";
+  import { orderRecent, groupByFolder, type RecentItem } from "../lib/recent";
+
   export let instance;
   export let app;
   export const plugin = undefined;
 
   $: cfg = instance?.config ?? {};
+  $: source = cfg.source ?? "opened";
+  $: type = cfg.type ?? "markdown";
   $: count = typeof cfg.count === "number" ? cfg.count : 7;
-  $: showFolder = cfg.showFolder ?? false;
+  $: grouped = cfg.groupByFolder ?? false;
+  $: showIcon = cfg.showIcon ?? true;
+  $: showDate = cfg.showDate ?? false;
 
-  function recents(): { path: string; name: string; folder: string }[] {
-    const paths: string[] = app?.workspace?.getLastOpenFiles?.() ?? [];
-    return paths
-      .filter((p) => app?.vault?.getAbstractFileByPath?.(p))
-      .slice(0, count)
-      .map((p) => {
-        const name = p.split("/").pop()?.replace(/\.md$/, "") ?? p;
-        const folder = p.includes("/") ? p.slice(0, p.lastIndexOf("/")) : "";
-        return { path: p, name, folder };
-      });
+  function iconFor(ext: string): string {
+    if (ext === "md") return "file-text";
+    if (["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp"].includes(ext)) return "image";
+    if (ext === "pdf") return "file-text";
+    if (["mp3", "wav", "ogg", "m4a", "flac"].includes(ext)) return "music";
+    if (["mp4", "mov", "webm", "mkv"].includes(ext)) return "film";
+    return "file";
   }
-  $: items = recents();
+  function icon(node: HTMLElement, name: string) {
+    setIcon(node, name);
+    return { update(n: string) { node.empty(); setIcon(node, n); } };
+  }
+  function fmtDate(ms: number): string {
+    if (!ms) return "";
+    return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  }
+
+  function gather(source: string, type: string, count: number, app: any): RecentItem[] {
+    if (!app) return [];
+    const toItem = (f: any): RecentItem => ({
+      path: f.path,
+      name: f.basename ?? f.path,
+      folder: f.parent && f.parent.path && f.parent.path !== "/" ? f.parent.path : "",
+      ext: (f.extension ?? "").toLowerCase(),
+      mtime: f.stat?.mtime ?? 0,
+      ctime: f.stat?.ctime ?? 0,
+    });
+    let items: RecentItem[] = [];
+    let openedOrder: string[] = [];
+    if (source === "opened") {
+      openedOrder = app.workspace.getLastOpenFiles?.() ?? [];
+      items = openedOrder
+        .map((p: string) => app.vault.getAbstractFileByPath(p))
+        .filter((f: unknown) => f instanceof TFile)
+        .map(toItem);
+    } else {
+      const files = type === "markdown" ? app.vault.getMarkdownFiles() : app.vault.getFiles();
+      items = files.map(toItem);
+    }
+    return orderRecent(items, openedOrder, { source: source as any, type: type as any, count });
+  }
+
+  $: items = gather(source, type, count, app);
+  $: groups = grouped ? groupByFolder(items) : null;
 
   function open(path: string): void {
     app?.workspace?.openLinkText?.(path, "", false);
   }
 </script>
 
-<div class="atrium-recent">
-  <div class="atrium-list-title">Recent</div>
-  {#if items.length === 0}
-    <div class="atrium-empty">No recent files</div>
-  {:else}
-    <ul>
-      {#each items as it}
-        <li><a href={"#"} on:click|preventDefault={() => open(it.path)}>
-          {it.name}{#if showFolder && it.folder}<span class="atrium-sub"> · {it.folder}</span>{/if}
-        </a></li>
+{#if items.length === 0}
+  <div class="atrium-empty">No recent files</div>
+{:else if groups}
+  {#each groups as g}
+    <div class="atrium-recent-folder">{g.folder}</div>
+    <ul class="atrium-recent-list">
+      {#each g.items as it (it.path)}
+        <li>
+          {#if showIcon}<span class="atrium-recent-icon" use:icon={iconFor(it.ext)}></span>{/if}
+          <!-- svelte-ignore a11y-invalid-attribute -->
+          <a href="#" on:click|preventDefault={() => open(it.path)}>{it.name}</a>
+          {#if showDate}<span class="atrium-sub">{fmtDate(it.mtime)}</span>{/if}
+        </li>
       {/each}
     </ul>
-  {/if}
-</div>
+  {/each}
+{:else}
+  <ul class="atrium-recent-list">
+    {#each items as it (it.path)}
+      <li>
+        {#if showIcon}<span class="atrium-recent-icon" use:icon={iconFor(it.ext)}></span>{/if}
+        <!-- svelte-ignore a11y-invalid-attribute -->
+        <a href="#" on:click|preventDefault={() => open(it.path)}>{it.name}</a>
+        {#if it.folder}<span class="atrium-sub">· {it.folder}</span>{/if}
+        {#if showDate}<span class="atrium-sub">{fmtDate(it.mtime)}</span>{/if}
+      </li>
+    {/each}
+  </ul>
+{/if}
 
 <style>
-  .atrium-recent { height: 100%; overflow: auto; }
-  .atrium-list-title { font-weight: 600; color: var(--text-muted); margin-bottom: 6px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; }
-  .atrium-recent ul { list-style: none; margin: 0; padding: 0; }
-  .atrium-recent li { padding: 2px 0; }
-  .atrium-recent a { color: var(--text-normal); cursor: pointer; text-decoration: none; }
-  .atrium-recent a:hover { color: var(--text-accent); }
-  .atrium-sub { color: var(--text-faint); font-size: 0.85em; }
+  .atrium-recent-list { list-style: none; margin: 0 0 6px; padding: 0; }
+  .atrium-recent-list li { display: flex; align-items: center; gap: 6px; padding: 2px 0; min-width: 0; }
+  .atrium-recent-icon { display: inline-flex; width: 15px; height: 15px; color: var(--text-muted); flex: 0 0 auto; }
+  .atrium-recent-icon :global(svg) { width: 15px; height: 15px; }
+  .atrium-recent-list a { color: var(--text-normal); cursor: pointer; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .atrium-recent-list a:hover { color: var(--text-accent); }
+  .atrium-recent-folder { font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); margin: 6px 0 2px; }
+  .atrium-sub { color: var(--text-faint); font-size: 0.85em; flex: 0 0 auto; }
   .atrium-empty { color: var(--text-faint); font-size: 0.85em; }
 </style>
