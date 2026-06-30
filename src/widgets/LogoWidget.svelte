@@ -30,6 +30,7 @@
 
 <style>
   .atrium-logo { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-  .atrium-logo img { max-width: 100%; max-height: 100%; }
+  /* The image fills the widget box so `object-fit` (contain/cover/fill) actually applies. */
+  .atrium-logo img { width: 100%; height: 100%; display: block; }
   .atrium-logo-empty { color: var(--text-faint); font-size: 0.85em; text-align: center; padding: 8px; }
 </style>
