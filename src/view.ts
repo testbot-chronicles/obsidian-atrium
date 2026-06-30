@@ -8,7 +8,8 @@ export const VIEW_TYPE_ATRIUM = "atrium-home";
 
 /**
  * The Atrium homepage view: hosts a gridstack grid that will render widgets in
- * a later phase. Layout changes are persisted back to the plugin data.
+ * a later phase. The grid starts locked (static); an Edit/Done toolbar button
+ * toggles drag/resize. Layout changes are persisted back to the plugin data.
  */
 export class AtriumView extends ItemView {
   /** The gridstack instance, created in {@link onOpen} and torn down in {@link onClose}. */
@@ -37,6 +38,16 @@ export class AtriumView extends ItemView {
     const root = this.contentEl;
     root.empty();
     root.addClass("atrium-root");
+
+    const bar = root.createDiv({ cls: "atrium-toolbar" });
+    const editBtn = bar.createEl("button", { text: "Edit layout" });
+    let editing = false;
+    editBtn.onclick = () => {
+      editing = !editing;
+      this.grid?.setStatic(!editing);
+      editBtn.setText(editing ? "Done" : "Edit layout");
+      root.toggleClass("is-editing", editing);
+    };
 
     const gridEl = root.createDiv({ cls: "grid-stack" });
     this.grid = GridStack.init(
