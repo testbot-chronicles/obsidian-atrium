@@ -4,6 +4,7 @@ import LogoWidget from "./LogoWidget.svelte";
 import RecentWidget from "./RecentWidget.svelte";
 import StatsWidget from "./StatsWidget.svelte";
 import GreetingWidget from "./GreetingWidget.svelte";
+import TodoWidget from "./TodoWidget.svelte";
 
 /** Register all built-in widgets. Call once during plugin onload. */
 export function registerAllWidgets(): void {
@@ -192,6 +193,19 @@ export function registerAllWidgets(): void {
       { key: "countdownLabel", label: "Label", type: "text", group: "Countdown" },
       { key: "countdownSize", label: "Size (px)", type: "slider", min: 12, max: 32, step: 1, group: "Countdown" },
       { key: "countdownColor", label: "Color", type: "color", group: "Countdown" },
+    ],
+  });
+  registerWidget({
+    type: "todos",
+    title: "Todos",
+    icon: "check-square",
+    defaultSize: { w: 4, h: 5 },
+    Component: TodoWidget as never,
+    defaultTitle: "Todos",
+    defaultConfig: { items: [], newPlaceholder: "Add a task…", showCompleted: true },
+    settingsSchema: [
+      { key: "newPlaceholder", label: "Input placeholder", type: "text" },
+      { key: "showCompleted", label: "Show completed", type: "toggle" },
     ],
   });
 }
