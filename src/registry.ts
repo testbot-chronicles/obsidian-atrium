@@ -26,6 +26,8 @@ export interface SettingsField {
   showIf?: { key: string; equals: unknown };
   /** Placeholder text for a `text` field, shown when the value is empty. */
   placeholder?: string;
+  /** Fields sharing a `group` render together under a collapsible sub-header within their section. */
+  group?: string;
 }
 
 /** Definition describing how to render and configure a widget type. */

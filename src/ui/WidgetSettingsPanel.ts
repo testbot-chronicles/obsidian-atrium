@@ -128,9 +128,26 @@ export class WidgetSettingsPanel {
 
     const content = group.createDiv({ cls: "atrium-settings-group-body" });
     const get = section.target;
+    let target: HTMLElement = content;
+    let currentGroup: string | undefined = undefined;
 
     for (const field of section.schema) {
-      const setting = new Setting(content).setName(field.label);
+      if (field.group !== currentGroup) {
+        currentGroup = field.group;
+        if (field.group) {
+          const sub = content.createDiv({ cls: "atrium-settings-subgroup" });
+          const subHeader = sub.createDiv({ cls: "atrium-settings-subheader" });
+          const subChevron = subHeader.createSpan({ cls: "atrium-settings-chevron" });
+          setIcon(subChevron, "chevron-down");
+          subHeader.createSpan({ text: field.group });
+          subHeader.onclick = () =>
+            sub.toggleClass("is-collapsed", !sub.hasClass("is-collapsed"));
+          target = sub.createDiv({ cls: "atrium-settings-subgroup-body" });
+        } else {
+          target = content;
+        }
+      }
+      const setting = new Setting(target).setName(field.label);
       const current = get()[field.key];
       switch (field.type) {
         case "text":

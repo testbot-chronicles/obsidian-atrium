@@ -91,9 +91,21 @@
 .atrium-widget-action.is-active { color: var(--text-accent); opacity: 1; }
 .atrium-root.is-editing .atrium-widget.is-locked { outline: 1px dashed var(--text-accent); outline-offset: -2px; }
 
+/* Collapsible sub-groups within a section */
+.atrium-settings-subgroup { margin: 4px 0 6px 2px; padding-left: 8px; border-left: 2px solid var(--background-modifier-border); }
+.atrium-settings-subheader {
+  display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;
+  margin: 6px 0 4px; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint);
+}
+.atrium-settings-subheader:hover { color: var(--text-muted); }
+.atrium-settings-subgroup.is-collapsed .atrium-settings-chevron { transform: rotate(-90deg); }
+.atrium-settings-subgroup.is-collapsed .atrium-settings-subgroup-body { display: none; }
+
 /* Orderlist settings field: full-width, stacked, selectable + reorderable list. */
 .atrium-orderlist-setting { display: block; }
 .atrium-orderlist-setting .setting-item-info { margin-bottom: 6px; }
+/* Orderlist control should be full-width and left-aligned, not squeezed right */
+.atrium-orderlist-setting .setting-item-control { display: block; width: 100%; justify-content: flex-start; }
 .atrium-orderlist { display: flex; flex-direction: column; gap: 4px; width: 100%; }
 .atrium-orderlist-row { display: flex; align-items: center; gap: 6px; }
 .atrium-orderlist-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
