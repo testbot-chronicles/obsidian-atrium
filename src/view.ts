@@ -98,9 +98,13 @@ export class AtriumView extends ItemView {
         w: inst.w,
         h: inst.h,
         content: "",
+        locked: !!inst.locked,
+        noMove: !!inst.locked,
+        noResize: !!inst.locked,
       });
       const host = el.querySelector(".grid-stack-item-content") as HTMLElement;
       host.addClass("atrium-widget");
+      host.toggleClass("is-locked", !!inst.locked);
       this.hosts.set(inst.id, host);
       applyAppearanceStyles(host, inst.appearance);
       try {
@@ -115,6 +119,25 @@ export class AtriumView extends ItemView {
         console.error("Atrium widget render failed:", inst.type, e);
       }
       const actions = host.createDiv({ cls: "atrium-widget-actions" });
+
+      const lockBtn = actions.createEl("button", { cls: "atrium-widget-action" });
+      const refreshLock = (): void => {
+        setIcon(lockBtn, inst.locked ? "lock" : "lock-open");
+        lockBtn.setAttr("aria-label", inst.locked ? "Unlock widget" : "Lock widget position");
+        lockBtn.toggleClass("is-active", !!inst.locked);
+        host.toggleClass("is-locked", !!inst.locked);
+      };
+      refreshLock();
+      lockBtn.onclick = (e) => {
+        e.stopPropagation();
+        inst.locked = !inst.locked;
+        const itemEl = host.closest(".grid-stack-item") as HTMLElement | null;
+        if (itemEl && this.grid) {
+          this.grid.update(itemEl, { locked: !!inst.locked, noMove: !!inst.locked, noResize: !!inst.locked });
+        }
+        refreshLock();
+        void this.plugin.saveAtrium();
+      };
 
       const del = actions.createEl("button", { cls: "atrium-widget-action" });
       del.setAttr("aria-label", "Remove widget");
@@ -179,15 +202,16 @@ export class AtriumView extends ItemView {
     menu.showAtMouseEvent(evt);
   }
 
-  /** Append a new widget of the given type at the top-left, persist, and reload. */
+  /** Append a new widget of the given type below all existing widgets, persist, and reload. */
   private addWidgetOfType(type: string): void {
     const def = getWidget(type);
     if (!def) return;
+    const bottom = this.plugin.data.layout.reduce((max, w) => Math.max(max, w.y + w.h), 0);
     const inst: WidgetInstance = {
       id: crypto.randomUUID(),
       type,
       x: 0,
-      y: 0,
+      y: bottom,
       w: def.defaultSize.w,
       h: def.defaultSize.h,
       config: { ...(def.defaultConfig ?? {}) },

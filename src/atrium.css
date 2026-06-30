@@ -70,3 +70,7 @@
 
 /* Don't navigate when clicking a linked logo while arranging the layout. */
 .atrium-root.is-editing .atrium-logo-link { pointer-events: none; }
+
+/* Per-widget lock: active lock action and a dashed outline on locked widgets while editing. */
+.atrium-widget-action.is-active { color: var(--text-accent); opacity: 1; }
+.atrium-root.is-editing .atrium-widget.is-locked { outline: 1px dashed var(--text-accent); outline-offset: -2px; }
