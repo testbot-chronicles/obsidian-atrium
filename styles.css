@@ -92,12 +92,23 @@
 .atrium-root.is-editing .atrium-widget.is-locked { outline: 1px dashed var(--text-accent); outline-offset: -2px; }
 
 /* Collapsible sub-groups within a section */
-.atrium-settings-subgroup { margin: 4px 0 6px 2px; padding-left: 8px; border-left: 2px solid var(--background-modifier-border); }
-.atrium-settings-subheader {
-  display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;
-  margin: 6px 0 4px; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint);
+.atrium-settings-subgroup {
+  margin: 6px 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+  overflow: hidden;
 }
-.atrium-settings-subheader:hover { color: var(--text-muted); }
+.atrium-settings-subheader {
+  display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
+  padding: 7px 10px; margin: 0;
+  font-size: 0.72em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-muted); transition: background 0.12s ease, color 0.12s ease;
+}
+.atrium-settings-subheader:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.atrium-settings-subgroup:not(.is-collapsed) .atrium-settings-subheader { border-bottom: 1px solid var(--background-modifier-border); }
+.atrium-settings-subgroup-body { padding: 2px 10px 6px; }
+.atrium-settings-subgroup .atrium-settings-chevron { color: var(--text-accent); }
 .atrium-settings-subgroup.is-collapsed .atrium-settings-chevron { transform: rotate(-90deg); }
 .atrium-settings-subgroup.is-collapsed .atrium-settings-subgroup-body { display: none; }
 
