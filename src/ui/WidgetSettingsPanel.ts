@@ -135,7 +135,7 @@ export class WidgetSettingsPanel {
       if (field.group !== currentGroup) {
         currentGroup = field.group;
         if (field.group) {
-          const sub = content.createDiv({ cls: "atrium-settings-subgroup" });
+          const sub = content.createDiv({ cls: "atrium-settings-subgroup is-collapsed" });
           const subHeader = sub.createDiv({ cls: "atrium-settings-subheader" });
           const subChevron = subHeader.createSpan({ cls: "atrium-settings-chevron" });
           setIcon(subChevron, "chevron-down");
