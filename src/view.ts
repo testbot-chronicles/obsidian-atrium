@@ -1,4 +1,4 @@
-import { ItemView, Menu, WorkspaceLeaf } from "obsidian";
+import { ItemView, Menu, WorkspaceLeaf, setIcon } from "obsidian";
 import { GridStack } from "gridstack";
 import type AtriumPlugin from "./main";
 import { fromGridNodes } from "./lib/layout";
@@ -109,8 +109,19 @@ export class AtriumView extends ItemView {
         host.setText("⚠️ widget error");
         console.error("Atrium widget render failed:", inst.type, e);
       }
-      const gear = host.createEl("button", { cls: "atrium-widget-gear", text: "⚙" });
+      const actions = host.createDiv({ cls: "atrium-widget-actions" });
+
+      const del = actions.createEl("button", { cls: "atrium-widget-action" });
+      del.setAttr("aria-label", "Remove widget");
+      setIcon(del, "trash-2");
+      del.onclick = (e) => {
+        e.stopPropagation();
+        this.removeWidget(inst.id);
+      };
+
+      const gear = actions.createEl("button", { cls: "atrium-widget-action" });
       gear.setAttr("aria-label", "Widget settings");
+      setIcon(gear, "settings");
       gear.onclick = (e) => {
         e.stopPropagation();
         this.openSettings(inst);
@@ -174,6 +185,13 @@ export class AtriumView extends ItemView {
       config: { ...(def.defaultConfig ?? {}) },
     };
     this.plugin.data.layout.push(inst);
+    void this.plugin.saveAtrium();
+    this.reload();
+  }
+
+  /** Remove a widget instance from the layout, persist, and re-render. */
+  private removeWidget(id: string): void {
+    this.plugin.data.layout = this.plugin.data.layout.filter((w) => w.id !== id);
     void this.plugin.saveAtrium();
     this.reload();
   }
