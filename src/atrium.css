@@ -9,3 +9,14 @@
 }
 .atrium-widget-gear:hover { opacity: 1; }
 .atrium-root:not(.is-editing) .atrium-widget-gear { display: none; }
+
+.atrium-segmented { display: inline-flex; gap: 4px; }
+.atrium-segmented button {
+  padding: 4px 10px; cursor: pointer;
+  background: var(--background-modifier-form-field); color: var(--text-muted);
+  border: 1px solid var(--background-modifier-border); border-radius: var(--radius-s);
+}
+.atrium-segmented button.is-active {
+  background: var(--interactive-accent); color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
