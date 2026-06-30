@@ -41,7 +41,7 @@
 
 <style>
   .atrium-tree-list { list-style: none; margin: 0; padding-left: 14px; }
-  .atrium-tree-list .atrium-recent-icon { display: inline-flex; width: 14px; height: 14px; color: var(--text-muted); flex: 0 0 auto; }
+  .atrium-tree-list .atrium-recent-icon { display: inline-flex; width: 14px; height: 14px; color: var(--atrium-recent-icon-color, var(--text-muted)); flex: 0 0 auto; }
   .atrium-tree-list .atrium-recent-icon :global(svg) { width: 14px; height: 14px; }
   /* connector lines */
   li { position: relative; padding-left: 14px; }
@@ -49,9 +49,9 @@
   li::after { content: ""; position: absolute; left: 0; top: 0.7em; width: 9px; border-top: 1px solid var(--atrium-accent, var(--background-modifier-border)); }
   li:last-child::before { bottom: auto; height: 0.7em; }
   .atrium-tree-folder, .atrium-tree-file { display: flex; align-items: center; gap: 6px; padding: 2px 0; min-width: 0; }
-  .atrium-tree-folder { color: var(--text-muted); font-weight: 600; }
-  .atrium-tree-file { color: var(--text-normal); text-decoration: none; cursor: pointer; }
+  .atrium-tree-folder { color: var(--atrium-recent-sub, var(--text-muted)); font-weight: 600; }
+  .atrium-tree-file { color: var(--atrium-recent-text, var(--text-normal)); text-decoration: none; cursor: pointer; }
   .atrium-tree-file:hover { color: var(--text-accent); }
   .atrium-tree-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .atrium-sub { color: var(--text-faint); font-size: 0.85em; flex: 0 0 auto; }
+  .atrium-sub { color: var(--atrium-recent-sub, var(--text-faint)); font-size: 0.85em; flex: 0 0 auto; }
 </style>

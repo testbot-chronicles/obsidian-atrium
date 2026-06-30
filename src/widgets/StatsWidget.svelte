@@ -13,6 +13,9 @@
   $: numberSize = typeof cfg.numberSize === "number" ? cfg.numberSize : 24;
   $: showIcons = cfg.showIcons ?? false;
   $: compact = cfg.compact ?? false;
+  $: numberColor = typeof cfg.numberColor === "string" ? cfg.numberColor : "";
+  $: labelColor = typeof cfg.labelColor === "string" ? cfg.labelColor : "";
+  $: colorVars = (numberColor ? `--atrium-stat-num:${numberColor};` : "") + (labelColor ? `--atrium-stat-label:${labelColor};` : "");
 
   const DEFS = [
     { key: "notes", label: "Notes", icon: "file-text" },
@@ -107,7 +110,7 @@
   $: gridStyle = orientation === "grid" ? `grid-template-columns:repeat(${columns},minmax(0,1fr));` : "";
 </script>
 
-<div class="atrium-stats" class:is-compact={compact} class:is-list={orientation === "list"} class:is-grid={orientation === "grid"} style={gridStyle}>
+<div class="atrium-stats" class:is-compact={compact} class:is-list={orientation === "list"} class:is-grid={orientation === "grid"} style={gridStyle + colorVars}>
   {#each selected as d (d.key)}
     <div class="atrium-stat">
       {#if showIcons}<span class="atrium-stat-icon" use:icon={d.icon}></span>{/if}
@@ -131,7 +134,7 @@
   .atrium-stats.is-compact .atrium-stat { flex-direction: row; align-items: baseline; gap: 6px; }
   .atrium-stat-icon { display: inline-flex; width: 14px; height: 14px; color: var(--text-muted); }
   .atrium-stat-icon :global(svg) { width: 14px; height: 14px; }
-  .atrium-stat-num { font-weight: 700; color: var(--atrium-accent, var(--text-normal)); line-height: 1.05; }
-  .atrium-stat-label { color: var(--text-muted); font-size: 0.8em; }
+  .atrium-stat-num { font-weight: 700; color: var(--atrium-stat-num, var(--atrium-accent, var(--text-normal))); line-height: 1.05; }
+  .atrium-stat-label { color: var(--atrium-stat-label, var(--text-muted)); font-size: 0.8em; }
   .atrium-empty { color: var(--text-faint); font-size: 0.85em; }
 </style>

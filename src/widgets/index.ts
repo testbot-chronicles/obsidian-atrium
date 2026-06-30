@@ -101,7 +101,7 @@ export function registerAllWidgets(): void {
     type: "recent", title: "Recent files", icon: "history", defaultSize: { w: 4, h: 4 },
     Component: RecentWidget as never,
     defaultTitle: "Recent files",
-    defaultConfig: { source: "opened", type: "markdown", count: 7, view: "list", showIcon: true, showDate: false },
+    defaultConfig: { source: "opened", type: "markdown", count: 7, view: "list", showIcon: true, showDate: false, textColor: "", subColor: "", iconColor: "" },
     settingsSchema: [
       { key: "source", label: "Source", type: "select", options: [
         { value: "opened", label: "Recently opened" }, { value: "modified", label: "Recently modified" }, { value: "created", label: "Recently created" } ] },
@@ -110,6 +110,9 @@ export function registerAllWidgets(): void {
       { key: "view", label: "Layout", type: "buttons", options: [ { value: "list", label: "List" }, { value: "tree", label: "Tree" } ] },
       { key: "showIcon", label: "Show file icon", type: "toggle" },
       { key: "showDate", label: "Show date", type: "toggle" },
+      { key: "textColor", label: "Text color", type: "color", group: "Colors" },
+      { key: "subColor", label: "Secondary color", type: "color", group: "Colors" },
+      { key: "iconColor", label: "Icon color", type: "color", group: "Colors" },
     ],
   });
   registerWidget({
@@ -119,6 +122,7 @@ export function registerAllWidgets(): void {
     defaultConfig: {
       stats: ["notes", "attachments", "allFiles"],
       orientation: "row", columns: 2, numberSize: 24, showIcons: false, compact: false,
+      numberColor: "", labelColor: "",
     },
     settingsSchema: [
       { key: "stats", label: "Stats shown", type: "orderlist", options: [
@@ -142,6 +146,8 @@ export function registerAllWidgets(): void {
       { key: "numberSize", label: "Number size (px)", type: "slider", min: 12, max: 64, step: 1 },
       { key: "showIcons", label: "Show icons", type: "toggle" },
       { key: "compact", label: "Compact", type: "toggle" },
+      { key: "numberColor", label: "Number color", type: "color", group: "Colors" },
+      { key: "labelColor", label: "Label color", type: "color", group: "Colors" },
     ],
   });
   registerWidget({
