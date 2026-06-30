@@ -118,3 +118,7 @@
 .atrium-orderlist-row button:not(:disabled):hover { color: var(--text-normal); }
 .atrium-orderlist-add { margin-top: 4px; }
 
+/* Per-card background image: a layer behind the card content, clipped to the rounded card. */
+.atrium-widget-bg { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; pointer-events: none; }
+.atrium-widget > .atrium-widget-content, .atrium-widget > .atrium-widget-header { position: relative; z-index: 1; }
+

@@ -107,7 +107,8 @@ export class AtriumView extends ItemView {
       host.addClass("atrium-widget");
       host.toggleClass("is-locked", !!inst.locked);
       this.hosts.set(inst.id, host);
-      applyAppearanceStyles(host, inst.appearance);
+      host.createDiv({ cls: "atrium-widget-bg" }); // background image layer (first child, behind content)
+      applyAppearanceStyles(host, inst.appearance, this.app); // now also styles the bg layer
       const content = host.createDiv({ cls: "atrium-widget-content" });
       this.refreshHeader(host, inst);
       try {
@@ -183,7 +184,7 @@ export class AtriumView extends ItemView {
   private updateWidget(inst: WidgetInstance): void {
     const host = this.hosts.get(inst.id);
     if (host) {
-      applyAppearanceStyles(host, inst.appearance);
+      applyAppearanceStyles(host, inst.appearance, this.app);
       this.refreshHeader(host, inst);
     }
     const handle = this.handles.get(inst.id);
