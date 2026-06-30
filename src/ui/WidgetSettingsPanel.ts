@@ -45,6 +45,7 @@ export class WidgetSettingsPanel {
   private static current: WidgetSettingsPanel | null = null;
 
   private el!: HTMLElement;
+  private body!: HTMLElement;
   private rows: {
     field: SettingsField;
     el: HTMLElement;
@@ -110,19 +111,60 @@ export class WidgetSettingsPanel {
 
     const header = this.el.createDiv({ cls: "atrium-settings-header" });
     header.createSpan({ text: this.def.title });
-    const closeBtn = header.createEl("button", {
-      cls: "atrium-settings-close",
-      text: "✕",
-    });
+
+    const actions = header.createDiv({ cls: "atrium-settings-header-actions" });
+
+    const resetBtn = actions.createEl("button", { cls: "atrium-settings-close" });
+    setIcon(resetBtn, "rotate-ccw");
+    resetBtn.setAttr("aria-label", "Reset this card to defaults");
+    let pendingReset = false;
+    let resetTimer: ReturnType<typeof setTimeout> | undefined;
+    resetBtn.onclick = () => {
+      if (!pendingReset) {
+        pendingReset = true;
+        resetBtn.addClass("is-warning");
+        resetBtn.setAttr("aria-label", "Click again to reset — this clears all this card's settings");
+        resetTimer = setTimeout(() => {
+          pendingReset = false;
+          resetBtn.removeClass("is-warning");
+          resetBtn.setAttr("aria-label", "Reset this card to defaults");
+        }, 2500);
+        return;
+      }
+      if (resetTimer) clearTimeout(resetTimer);
+      this.resetCard();
+    };
+
+    const closeBtn = actions.createEl("button", { cls: "atrium-settings-close", text: "✕" });
     closeBtn.setAttr("aria-label", "Close");
     closeBtn.onclick = () => this.close();
+
     header.addEventListener("mousedown", (e) => this.startDrag(e));
 
-    const body = this.el.createDiv({ cls: "atrium-settings-body" });
-    for (const section of this.sections()) this.buildSection(body, section);
-    this.applyVisibility();
+    this.body = this.el.createDiv({ cls: "atrium-settings-body" });
+    this.renderBody();
 
     document.addEventListener("keydown", this.onKey);
+  }
+
+  /** (Re)render the settings body from the current sections. */
+  private renderBody(): void {
+    this.body.empty();
+    this.rows = [];
+    for (const section of this.sections()) this.buildSection(this.body, section);
+    this.applyVisibility();
+  }
+
+  /**
+   * Reset this card's settings (config, appearance, general) to the widget defaults.
+   * Keeps the card's grid position/size and lock state.
+   */
+  private resetCard(): void {
+    this.instance.config = { ...(this.def.defaultConfig ?? {}) };
+    this.instance.appearance = { ...DEFAULT_APPEARANCE };
+    this.instance.general = defaultGeneral(this.def.defaultTitle);
+    this.hooks.onChange(); // live-apply to the widget
+    this.renderBody(); // re-render the panel so inputs show the defaults
   }
 
   /**

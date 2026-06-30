@@ -156,3 +156,7 @@
 /* Per-card background image: a layer behind the card content, clipped to the rounded card. */
 .atrium-widget-bg { position: absolute; inset: 0; z-index: 0; background-repeat: no-repeat; pointer-events: none; }
 .atrium-widget > .atrium-widget-content, .atrium-widget > .atrium-widget-header { position: relative; z-index: 1; }
+
+/* Settings header actions: reset + close buttons grouped on the right. */
+.atrium-settings-header-actions { display: flex; align-items: center; gap: 2px; }
+.atrium-settings-close.is-warning { color: var(--text-error); }
