@@ -27,8 +27,12 @@
   $: containerStyle = `justify-content:${halign};align-items:${valign};`;
   // Sizing applies to the outer box (img or link button); look applies to the img itself.
   $: boxStyle = `width:${scale}%;height:${scale}%;`;
+  // Map the flex alignment to object-position so placement stays meaningful even at 100%
+  // (which part shows in Cover, where the letterboxed image sits in Contain).
+  $: hpos = halign === "flex-start" ? "left" : halign === "flex-end" ? "right" : "center";
+  $: vpos = valign === "flex-start" ? "top" : valign === "flex-end" ? "bottom" : "center";
   $: imgStyle =
-    `object-fit:${fit};` +
+    `object-fit:${fit};object-position:${hpos} ${vpos};` +
     `filter:grayscale(${grayscale ? 1 : 0});opacity:${opacity / 100};`;
 
   function activate(): void {
