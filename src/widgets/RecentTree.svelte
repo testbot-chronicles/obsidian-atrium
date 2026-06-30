@@ -45,8 +45,8 @@
   .atrium-tree-list .atrium-recent-icon :global(svg) { width: 14px; height: 14px; }
   /* connector lines */
   li { position: relative; padding-left: 14px; }
-  li::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--background-modifier-border); }
-  li::after { content: ""; position: absolute; left: 0; top: 0.7em; width: 9px; border-top: 1px solid var(--background-modifier-border); }
+  li::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--atrium-accent, var(--background-modifier-border)); }
+  li::after { content: ""; position: absolute; left: 0; top: 0.7em; width: 9px; border-top: 1px solid var(--atrium-accent, var(--background-modifier-border)); }
   li:last-child::before { bottom: auto; height: 0.7em; }
   .atrium-tree-folder, .atrium-tree-file { display: flex; align-items: center; gap: 6px; padding: 2px 0; min-width: 0; }
   .atrium-tree-folder { color: var(--text-muted); font-weight: 600; }

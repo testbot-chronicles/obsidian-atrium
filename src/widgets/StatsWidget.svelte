@@ -12,7 +12,6 @@
   $: columns = typeof cfg.columns === "number" ? cfg.columns : 2;
   $: numberSize = typeof cfg.numberSize === "number" ? cfg.numberSize : 24;
   $: showIcons = cfg.showIcons ?? false;
-  $: useAccent = cfg.accent ?? false;
   $: compact = cfg.compact ?? false;
 
   const DEFS = [
@@ -103,9 +102,9 @@
       {#if showIcons}<span class="atrium-stat-icon" use:icon={d.icon}></span>{/if}
       {#if compact}
         <span class="atrium-stat-label">{d.label}</span>
-        <span class="atrium-stat-num" class:accent={useAccent} style={`font-size:${Math.max(12, Math.round(numberSize * 0.6))}px`}>{valueOf(d.key)}</span>
+        <span class="atrium-stat-num" style={`font-size:${Math.max(12, Math.round(numberSize * 0.6))}px`}>{valueOf(d.key)}</span>
       {:else}
-        <span class="atrium-stat-num" class:accent={useAccent} style={`font-size:${numberSize}px`}>{valueOf(d.key)}</span>
+        <span class="atrium-stat-num" style={`font-size:${numberSize}px`}>{valueOf(d.key)}</span>
         <span class="atrium-stat-label">{d.label}</span>
       {/if}
     </div>
@@ -121,8 +120,7 @@
   .atrium-stats.is-compact .atrium-stat { flex-direction: row; align-items: baseline; gap: 6px; }
   .atrium-stat-icon { display: inline-flex; width: 14px; height: 14px; color: var(--text-muted); }
   .atrium-stat-icon :global(svg) { width: 14px; height: 14px; }
-  .atrium-stat-num { font-weight: 700; color: var(--text-normal); line-height: 1.05; }
-  .atrium-stat-num.accent { color: var(--text-accent); }
+  .atrium-stat-num { font-weight: 700; color: var(--atrium-accent, var(--text-normal)); line-height: 1.05; }
   .atrium-stat-label { color: var(--text-muted); font-size: 0.8em; }
   .atrium-empty { color: var(--text-faint); font-size: 0.85em; }
 </style>

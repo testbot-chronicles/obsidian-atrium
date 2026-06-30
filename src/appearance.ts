@@ -9,6 +9,8 @@ export interface WidgetAppearance {
   border: boolean;
   borderColor: string;  // "" → theme default (--background-modifier-border)
   shadow: boolean;
+  accent: boolean;
+  accentColor: string;  // "" → theme default (--interactive-accent)
 }
 
 /** Defaults reproduce the current card look. */
@@ -20,6 +22,8 @@ export const DEFAULT_APPEARANCE: WidgetAppearance = {
   border: true,
   borderColor: "",
   shadow: false,
+  accent: false,
+  accentColor: "",
 };
 
 export const APPEARANCE_SCHEMA: SettingsField[] = [
@@ -30,6 +34,8 @@ export const APPEARANCE_SCHEMA: SettingsField[] = [
   { key: "border", label: "Border", type: "toggle" },
   { key: "borderColor", label: "Border color", type: "color", showIf: { key: "border", equals: true } },
   { key: "shadow", label: "Drop shadow", type: "toggle" },
+  { key: "accent", label: "Accent color", type: "toggle" },
+  { key: "accentColor", label: "Accent", type: "color", showIf: { key: "accent", equals: true } },
 ];
 
 /** Resolve the appearance into inline styles applied to the widget host element. */
@@ -40,4 +46,6 @@ export function applyAppearanceStyles(host: HTMLElement, raw: Partial<WidgetAppe
   host.style.borderRadius = `${a.radius}px`;
   host.style.border = a.border ? `1px solid ${a.borderColor || "var(--background-modifier-border)"}` : "none";
   host.style.boxShadow = a.shadow ? "0 4px 14px rgba(0, 0, 0, 0.3)" : "none";
+  if (a.accent) host.style.setProperty("--atrium-accent", a.accentColor || "var(--interactive-accent)");
+  else host.style.removeProperty("--atrium-accent");
 }

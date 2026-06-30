@@ -31,6 +31,6 @@
 <style>
   .atrium-greeting { height: 100%; display: flex; flex-direction: column; justify-content: center; }
   .atrium-greeting-hello { font-size: 1.4em; font-weight: 600; color: var(--text-normal); }
-  .atrium-greeting-time { font-size: 2em; font-weight: 700; color: var(--text-normal); line-height: 1.1; }
+  .atrium-greeting-time { font-size: 2em; font-weight: 700; color: var(--atrium-accent, var(--text-normal)); line-height: 1.1; }
   .atrium-greeting-date { color: var(--text-muted); font-size: 0.9em; }
 </style>

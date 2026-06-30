@@ -121,7 +121,7 @@ export function registerAllWidgets(): void {
       show_folders: false, show_links: false, show_unresolvedLinks: false,
       show_tags: false, show_tasks: false, show_words: false, show_characters: false,
       show_readingTime: false, show_createdToday: false, show_createdWeek: false, show_modifiedToday: false,
-      orientation: "row", columns: 2, numberSize: 24, showIcons: false, accent: false, compact: false,
+      orientation: "row", columns: 2, numberSize: 24, showIcons: false, compact: false,
     },
     settingsSchema: [
       { key: "show_notes", label: "Notes", type: "toggle" },
@@ -142,7 +142,6 @@ export function registerAllWidgets(): void {
       { key: "columns", label: "Grid columns", type: "slider", min: 1, max: 4, step: 1, showIf: { key: "orientation", equals: "grid" } },
       { key: "numberSize", label: "Number size (px)", type: "slider", min: 12, max: 64, step: 1 },
       { key: "showIcons", label: "Show icons", type: "toggle" },
-      { key: "accent", label: "Accent color numbers", type: "toggle" },
       { key: "compact", label: "Compact", type: "toggle" },
     ],
   });
