@@ -3,7 +3,7 @@ import { GridStack } from "gridstack";
 import type AtriumPlugin from "./main";
 import { fromGridNodes } from "./lib/layout";
 import { getWidget, allWidgets } from "./registry";
-import { mountWidget, MountedWidget } from "./widgets/mount";
+import { mountWidget, type MountedWidget } from "./widgets/mount";
 import { WidgetSettingsPanel } from "./ui/WidgetSettingsPanel";
 import { applyAppearanceStyles } from "./appearance";
 import { resolveTitle } from "./general";

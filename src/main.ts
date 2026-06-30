@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { AtriumData } from "./types";
+import type { AtriumData } from "./types";
 import { migrate } from "./lib/migrate";
 import { AtriumView, VIEW_TYPE_ATRIUM } from "./view";
 import { registerAllWidgets } from "./widgets";

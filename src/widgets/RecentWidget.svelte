@@ -1,6 +1,7 @@
 <script lang="ts">
   import { setIcon, TFile } from "obsidian";
-  import { orderRecent, groupByFolder, type RecentItem } from "../lib/recent";
+  import { orderRecent, buildTree, type RecentItem } from "../lib/recent";
+  import RecentTree from "./RecentTree.svelte";
 
   export let instance;
   export let app;
@@ -10,7 +11,7 @@
   $: source = cfg.source ?? "opened";
   $: type = cfg.type ?? "markdown";
   $: count = typeof cfg.count === "number" ? cfg.count : 7;
-  $: grouped = cfg.groupByFolder ?? false;
+  $: view = cfg.view ?? (cfg.groupByFolder ? "tree" : "list");
   $: showIcon = cfg.showIcon ?? true;
   $: showDate = cfg.showDate ?? false;
 
@@ -57,7 +58,6 @@
   }
 
   $: items = gather(source, type, count, app);
-  $: groups = grouped ? groupByFolder(items) : null;
 
   function open(path: string): void {
     app?.workspace?.openLinkText?.(path, "", false);
@@ -66,20 +66,8 @@
 
 {#if items.length === 0}
   <div class="atrium-empty">No recent files</div>
-{:else if groups}
-  {#each groups as g}
-    <div class="atrium-recent-folder">{g.folder}</div>
-    <ul class="atrium-recent-list">
-      {#each g.items as it (it.path)}
-        <li>
-          {#if showIcon}<span class="atrium-recent-icon" use:icon={iconFor(it.ext)}></span>{/if}
-          <!-- svelte-ignore a11y-invalid-attribute -->
-          <a href="#" on:click|preventDefault={() => open(it.path)}>{it.name}</a>
-          {#if showDate}<span class="atrium-sub">{fmtDate(it.mtime)}</span>{/if}
-        </li>
-      {/each}
-    </ul>
-  {/each}
+{:else if view === "tree"}
+  <RecentTree nodes={buildTree(items)} {showIcon} {showDate} onOpen={open} />
 {:else}
   <ul class="atrium-recent-list">
     {#each items as it (it.path)}
@@ -101,7 +89,6 @@
   .atrium-recent-icon :global(svg) { width: 15px; height: 15px; }
   .atrium-recent-list a { color: var(--text-normal); cursor: pointer; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .atrium-recent-list a:hover { color: var(--text-accent); }
-  .atrium-recent-folder { font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); margin: 6px 0 2px; }
   .atrium-sub { color: var(--text-faint); font-size: 0.85em; flex: 0 0 auto; }
   .atrium-empty { color: var(--text-faint); font-size: 0.85em; }
 </style>

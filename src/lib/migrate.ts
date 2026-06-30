@@ -1,4 +1,4 @@
-import { AtriumData, DEFAULT_DATA, CURRENT_VERSION } from "../types";
+import { DEFAULT_DATA, CURRENT_VERSION, type AtriumData } from "../types";
 
 export function migrate(raw: unknown): AtriumData {
   if (!raw || typeof raw !== "object") return structuredClone(DEFAULT_DATA);

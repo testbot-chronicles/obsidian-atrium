@@ -101,13 +101,13 @@ export function registerAllWidgets(): void {
     type: "recent", title: "Recent files", icon: "history", defaultSize: { w: 4, h: 4 },
     Component: RecentWidget as never,
     defaultTitle: "Recent files",
-    defaultConfig: { source: "opened", type: "markdown", count: 7, groupByFolder: false, showIcon: true, showDate: false },
+    defaultConfig: { source: "opened", type: "markdown", count: 7, view: "list", showIcon: true, showDate: false },
     settingsSchema: [
       { key: "source", label: "Source", type: "select", options: [
         { value: "opened", label: "Recently opened" }, { value: "modified", label: "Recently modified" }, { value: "created", label: "Recently created" } ] },
       { key: "type", label: "File types", type: "buttons", options: [ { value: "markdown", label: "Notes" }, { value: "all", label: "All" } ] },
       { key: "count", label: "How many", type: "slider", min: 3, max: 20, step: 1 },
-      { key: "groupByFolder", label: "Group by folder", type: "toggle" },
+      { key: "view", label: "Layout", type: "buttons", options: [ { value: "list", label: "List" }, { value: "tree", label: "Tree" } ] },
       { key: "showIcon", label: "Show file icon", type: "toggle" },
       { key: "showDate", label: "Show date", type: "toggle" },
     ],
