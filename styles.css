@@ -43,3 +43,16 @@
 .atrium-settings-close:hover { color: var(--text-normal); }
 .atrium-settings-body { padding: 8px 12px; overflow-y: auto; }
 
+/* Visible snap grid — only in edit mode. Column lines every 1/cols, row lines every cell height. */
+.atrium-root.is-editing .grid-stack {
+  background-image:
+    linear-gradient(to right, var(--background-modifier-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--background-modifier-border) 1px, transparent 1px);
+  background-size:
+    calc(100% / var(--atrium-cols, 12)) 100%,
+    100% var(--atrium-cell-h, 70px);
+  background-position: 0 0;
+  border-radius: var(--radius-s);
+  box-shadow: inset 0 0 0 1px var(--background-modifier-border);
+}
+

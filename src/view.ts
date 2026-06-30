@@ -10,6 +10,11 @@ import type { WidgetInstance } from "./types";
 /** Unique view type identifier for the Atrium homepage view. */
 export const VIEW_TYPE_ATRIUM = "atrium-home";
 
+/** Number of grid columns. Kept in sync with the CSS overlay via a custom property. */
+const GRID_COLUMNS = 12;
+/** Row height in px. Kept in sync with the CSS overlay via a custom property. */
+const GRID_CELL_HEIGHT = 70;
+
 /**
  * The Atrium homepage view: hosts a gridstack grid that renders the saved
  * widget layout. The grid starts locked (static); an Edit/Done toolbar button
@@ -67,9 +72,11 @@ export class AtriumView extends ItemView {
 
     const gridEl = root.createDiv({ cls: "grid-stack" });
     this.grid = GridStack.init(
-      { column: 12, cellHeight: 70, margin: 8, float: true, staticGrid: true },
+      { column: GRID_COLUMNS, cellHeight: GRID_CELL_HEIGHT, margin: 8, float: true, staticGrid: true },
       gridEl,
     );
+    gridEl.style.setProperty("--atrium-cols", String(GRID_COLUMNS));
+    gridEl.style.setProperty("--atrium-cell-h", `${GRID_CELL_HEIGHT}px`);
     this.grid.on("change", () => this.persist());
 
     this.renderWidgets();
