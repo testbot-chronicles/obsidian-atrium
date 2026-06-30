@@ -1,6 +1,7 @@
 import { Setting } from "obsidian";
 import type { WidgetDef, SettingsField } from "../registry";
 import type { WidgetInstance } from "../types";
+import { APPEARANCE_SCHEMA, DEFAULT_APPEARANCE } from "../appearance";
 
 /** Callbacks the panel invokes to drive live preview and persistence. */
 export interface SettingsHooks {
@@ -10,16 +11,28 @@ export interface SettingsHooks {
   onCommit: () => void;
 }
 
+/** A single titled group of settings rows bound to one target object. */
+interface Section {
+  title: string;
+  schema: SettingsField[];
+  /** The live object whose keys the section's rows mutate in place. */
+  target: () => Record<string, unknown>;
+}
+
 /**
- * Floating, non-modal, draggable settings panel for a widget instance.
- * Edits `instance.config` live (no backdrop, no blocking) and persists on close.
- * Only one panel is open at a time.
+ * Floating, non-modal, draggable settings panel. Renders the widget's own
+ * settings plus a shared Appearance section, applying changes live and
+ * persisting on close. Only one panel open at a time.
  */
 export class WidgetSettingsPanel {
   private static current: WidgetSettingsPanel | null = null;
 
   private el!: HTMLElement;
-  private rows: { field: SettingsField; el: HTMLElement }[] = [];
+  private rows: {
+    field: SettingsField;
+    el: HTMLElement;
+    target: () => Record<string, unknown>;
+  }[] = [];
   private onKey = (e: KeyboardEvent): void => {
     if (e.key === "Escape") this.close();
   };
@@ -35,9 +48,27 @@ export class WidgetSettingsPanel {
     WidgetSettingsPanel.current?.close();
   }
 
-  /** The live config object the panel mutates in place. */
-  private cfg(): Record<string, unknown> {
-    return this.instance.config;
+  /**
+   * The sections to render: the widget's own settings (writing `instance.config`)
+   * and the shared Appearance section (writing `instance.appearance`, lazily
+   * initialized from {@link DEFAULT_APPEARANCE}).
+   */
+  private sections(): Section[] {
+    return [
+      {
+        title: `${this.def.title} settings`,
+        schema: this.def.settingsSchema ?? [],
+        target: () => this.instance.config,
+      },
+      {
+        title: "Appearance",
+        schema: APPEARANCE_SCHEMA,
+        target: () => {
+          if (!this.instance.appearance) this.instance.appearance = { ...DEFAULT_APPEARANCE };
+          return this.instance.appearance as unknown as Record<string, unknown>;
+        },
+      },
+    ];
   }
 
   /** Mount the panel into `document.body`, replacing any panel already open. */
@@ -48,7 +79,7 @@ export class WidgetSettingsPanel {
     this.el = document.body.createDiv({ cls: "atrium-settings-panel" });
 
     const header = this.el.createDiv({ cls: "atrium-settings-header" });
-    header.createSpan({ text: `${this.def.title} settings` });
+    header.createSpan({ text: this.def.title });
     const closeBtn = header.createEl("button", {
       cls: "atrium-settings-close",
       text: "✕",
@@ -58,27 +89,26 @@ export class WidgetSettingsPanel {
     header.addEventListener("mousedown", (e) => this.startDrag(e));
 
     const body = this.el.createDiv({ cls: "atrium-settings-body" });
-    this.buildRows(body);
+    for (const section of this.sections()) this.buildSection(body, section);
     this.applyVisibility();
 
     document.addEventListener("keydown", this.onKey);
   }
 
-  /** Build a settings row per schema field, wiring live edits into `instance.config`. */
-  private buildRows(body: HTMLElement): void {
-    const schema = this.def.settingsSchema ?? [];
-    if (schema.length === 0) {
-      body.createEl("p", { text: "This widget has no settings." });
-    }
+  /** Build a heading and a row per schema field for one section, wiring live edits into its target. */
+  private buildSection(body: HTMLElement, section: Section): void {
+    if (section.schema.length === 0) return;
+    body.createEl("h4", { cls: "atrium-settings-section", text: section.title });
+    const get = section.target;
 
-    for (const field of schema) {
+    for (const field of section.schema) {
       const setting = new Setting(body).setName(field.label);
-      const current = this.cfg()[field.key];
+      const current = get()[field.key];
       switch (field.type) {
         case "text":
           setting.addText((t) =>
             t.setValue(current == null ? "" : String(current)).onChange((v) => {
-              this.cfg()[field.key] = v;
+              get()[field.key] = v;
               this.changed();
             }),
           );
@@ -87,7 +117,7 @@ export class WidgetSettingsPanel {
           setting.addText((t) => {
             t.inputEl.type = "number";
             t.setValue(current == null ? "" : String(current)).onChange((v) => {
-              this.cfg()[field.key] = v === "" ? null : Number(v);
+              get()[field.key] = v === "" ? null : Number(v);
               this.changed();
             });
           });
@@ -99,7 +129,7 @@ export class WidgetSettingsPanel {
               .setValue(typeof current === "number" ? current : field.min ?? 0)
               .setDynamicTooltip()
               .onChange((v) => {
-                this.cfg()[field.key] = v;
+                get()[field.key] = v;
                 this.changed();
               }),
           );
@@ -110,7 +140,7 @@ export class WidgetSettingsPanel {
             // Color picker only understands hex/rgb; skip CSS-var or empty defaults.
             if (/^#|^rgb/i.test(val)) c.setValue(val);
             c.onChange((v) => {
-              this.cfg()[field.key] = v;
+              get()[field.key] = v;
               this.changed();
             });
           });
@@ -118,7 +148,7 @@ export class WidgetSettingsPanel {
         case "toggle":
           setting.addToggle((tg) =>
             tg.setValue(Boolean(current)).onChange((v) => {
-              this.cfg()[field.key] = v;
+              get()[field.key] = v;
               this.changed();
             }),
           );
@@ -127,7 +157,7 @@ export class WidgetSettingsPanel {
           setting.addDropdown((d) => {
             for (const opt of field.options ?? []) d.addOption(opt.value, opt.label);
             d.setValue(current == null ? "" : String(current)).onChange((v) => {
-              this.cfg()[field.key] = v;
+              get()[field.key] = v;
               this.changed();
             });
           });
@@ -137,17 +167,14 @@ export class WidgetSettingsPanel {
           const sync = (): void => {
             wrap.querySelectorAll("button").forEach((b) => {
               const btn = b as HTMLButtonElement;
-              btn.classList.toggle(
-                "is-active",
-                btn.dataset.value === String(this.cfg()[field.key]),
-              );
+              btn.classList.toggle("is-active", btn.dataset.value === String(get()[field.key]));
             });
           };
           for (const opt of field.options ?? []) {
             const btn = wrap.createEl("button", { text: opt.label });
             btn.dataset.value = opt.value;
             btn.onclick = () => {
-              this.cfg()[field.key] = opt.value;
+              get()[field.key] = opt.value;
               sync();
               this.changed();
             };
@@ -156,15 +183,14 @@ export class WidgetSettingsPanel {
           break;
         }
       }
-      this.rows.push({ field, el: setting.settingEl });
+      this.rows.push({ field, el: setting.settingEl, target: get });
     }
   }
 
-  /** Show/hide rows whose `showIf` condition is (un)met. */
+  /** Show/hide rows whose `showIf` condition is (un)met, evaluated against the row's own section target. */
   private applyVisibility(): void {
-    for (const { field, el } of this.rows) {
-      const visible =
-        !field.showIf || this.cfg()[field.showIf.key] === field.showIf.equals;
+    for (const { field, el, target } of this.rows) {
+      const visible = !field.showIf || target()[field.showIf.key] === field.showIf.equals;
       el.style.display = visible ? "" : "none";
     }
   }

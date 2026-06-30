@@ -51,6 +51,12 @@
 }
 .atrium-settings-close:hover { color: var(--text-normal); }
 .atrium-settings-body { padding: 8px 12px; overflow-y: auto; }
+.atrium-settings-section {
+  margin: 14px 0 6px; padding-top: 10px;
+  font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-muted); border-top: 1px solid var(--background-modifier-border);
+}
+.atrium-settings-body > .atrium-settings-section:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
 
 /* Visible snap grid — only in edit mode. Column lines every 1/cols, row lines every cell height. */
 .atrium-root.is-editing .grid-stack {

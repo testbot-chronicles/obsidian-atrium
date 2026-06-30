@@ -1,3 +1,5 @@
+import type { WidgetAppearance } from "./appearance";
+
 export interface BackgroundSettings {
   type: "none" | "color" | "gradient" | "image";
   value: string;
@@ -14,6 +16,7 @@ export interface WidgetInstance {
   type: string;
   x: number; y: number; w: number; h: number;
   config: Record<string, unknown>;
+  appearance?: WidgetAppearance;
 }
 export interface Todo { id: string; text: string; done: boolean; order: number; }
 export interface AtriumData {

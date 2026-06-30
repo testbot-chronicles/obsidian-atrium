@@ -5,6 +5,7 @@ import { fromGridNodes } from "./lib/layout";
 import { getWidget, allWidgets } from "./registry";
 import { mountWidget, MountedWidget } from "./widgets/mount";
 import { WidgetSettingsPanel } from "./ui/WidgetSettingsPanel";
+import { applyAppearanceStyles } from "./appearance";
 import type { WidgetInstance } from "./types";
 
 /** Unique view type identifier for the Atrium homepage view. */
@@ -26,6 +27,8 @@ export class AtriumView extends ItemView {
   grid?: GridStack;
   /** Handles to mounted Svelte widget instances, keyed by instance id. */
   private handles = new Map<string, MountedWidget>();
+  /** Host elements (`.atrium-widget`) per instance id, for live appearance updates. */
+  private hosts = new Map<string, HTMLElement>();
   /**
    * When set, {@link persist} is a no-op. Guards against gridstack's `change`
    * event firing during programmatic grid mutations (add/removeAll), which would
@@ -98,6 +101,8 @@ export class AtriumView extends ItemView {
       });
       const host = el.querySelector(".grid-stack-item-content") as HTMLElement;
       host.addClass("atrium-widget");
+      this.hosts.set(inst.id, host);
+      applyAppearanceStyles(host, inst.appearance);
       try {
         const handle = mountWidget(def.Component, host, {
           app: this.app,
@@ -140,8 +145,10 @@ export class AtriumView extends ItemView {
     }).open();
   }
 
-  /** Push the (mutated) instance config into its mounted component reactively. */
+  /** Push the (mutated) instance config and appearance into the live widget. */
   private updateWidget(inst: WidgetInstance): void {
+    const host = this.hosts.get(inst.id);
+    if (host) applyAppearanceStyles(host, inst.appearance);
     const handle = this.handles.get(inst.id);
     // Pass a fresh object so Svelte's reactivity ($: cfg = instance.config) re-runs.
     handle?.update({ instance: { ...inst, config: { ...inst.config } } });
@@ -152,6 +159,7 @@ export class AtriumView extends ItemView {
     this.suppressPersist = true;
     this.handles.forEach((h) => h.destroy());
     this.handles.clear();
+    this.hosts.clear();
     this.grid?.removeAll(true, false); // FIX: remove DOM, no change event
     this.suppressPersist = false;
     this.renderWidgets();
@@ -212,6 +220,7 @@ export class AtriumView extends ItemView {
     WidgetSettingsPanel.closeCurrent();
     this.handles.forEach((h) => h.destroy());
     this.handles.clear();
+    this.hosts.clear();
     this.grid?.destroy(false);
     this.grid = undefined;
   }
